@@ -2,7 +2,7 @@ import state from './state.js';
 import { escHtml, showToast, toastError, toastSuccess, apiFetch } from './utils.js';
 import { renderCanvas, renderMath } from './canvas.js';
 import { pushHistory, undo, redo, updateUndoButtons } from './history.js';
-import { refreshSortables, bindDragDrop, _saveElementOrder, setInsertTarget } from './dragdrop.js';
+import { refreshSortables, bindDragDrop, _saveElementOrder, setInsertTarget, insertSectionBefore } from './dragdrop.js';
 import { openHtmlImportModal } from './html-import.js';
 import { toggleNavigator, renderNavigator as renderNav, _showCanvasContext, _showNavContext, _hideNavContext, _hideCanvasContext, _navMoveElement, _navMoveRelative, _navPasteAfter, _startNavRename } from './navigator.js';
 import { loadControls, switchEditorTab } from './controls.js';
@@ -39,6 +39,7 @@ const editor = {
         state.showCanvasContext = (x, y, elId) => _showCanvasContext(state, x, y, elId);
         state._saveElementOrder = () => _saveElementOrder(state);
         state.setInsertTarget = (parentId) => setInsertTarget(state, parentId);
+        state.insertSectionBefore = (beforeId) => insertSectionBefore(state, beforeId);
 
         loadElements();
         loadPageData();
@@ -124,6 +125,9 @@ if (document.readyState === 'loading') {
 }
 
 document.addEventListener('click', (e) => {
+    // A button that swaps its own content (icons) leaves a detached target behind: that click
+    // happened inside the panel, so it must not count as "clicked outside" and close the editor
+    if (!e.target.isConnected) return;
     if (!e.target.closest('.pb-el') && !e.target.closest('.pb-structure-item') && !e.target.closest('.pb-settings') && !e.target.closest('.pb-toolbar') && !e.target.closest('.pb-nav-context') && !e.target.closest('.pb-multi-toolbar')) {
         document.querySelectorAll('.pb-el.selected, .pb-el.multi-selected').forEach(el => {
             el.classList.remove('selected');

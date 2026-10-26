@@ -34,6 +34,57 @@ export function valuesForDevice(el, device = 'desktop') {
     return { settings, styles };
 }
 
+// CSS properties that take a length: a bare number means pixels
+const LENGTH_PROP = /^(margin|padding)(-(top|right|bottom|left))?$|(^|-)(width|height|radius|gap|size|top|left|right|bottom|spacing|indent)$/;
+
+export function cssLength(prop, value) {
+    const v = String(value).trim();
+    // line-height also ends in "height" but a bare number there is a valid multiplier
+    return prop !== 'line-height' && LENGTH_PROP.test(prop) && /^-?\d+(\.\d+)?$/.test(v) && v !== '0' ? v + 'px' : v;
+}
+
+/**
+ * The inline style the published page puts on the element wrapper (Renderer::buildStyleString):
+ * every plain style value, with camelCase / snake_case keys turned into CSS properties.
+ */
+export function wrapperStyleProps(styles) {
+    const out = [];
+    for (const [key, value] of Object.entries(styles || {})) {
+        if (value === null || value === '' || typeof value === 'object' || typeof value === 'boolean') continue;
+        const prop = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/_/g, '-').toLowerCase();
+        out.push([prop, cssLength(prop, value)]);
+    }
+    return out;
+}
+
+// Applied to the element's content box so the editor shows margins/paddings like the published page
+export function applyWrapperStyles(div, styles) {
+    const box = div && div.querySelector(':scope > .pb-el-content');
+    if (!box) return;
+    box.removeAttribute('style');
+    for (const [prop, value] of wrapperStyleProps(styles)) {
+        if (/^[a-z-]+$/.test(prop)) box.style.setProperty(prop, value);
+    }
+}
+
+// A thin hover zone between two consecutive top-level sections; its "+" creates a new section there
+function addSectionInserters(state, dz) {
+    const roots = [...dz.querySelectorAll(':scope > .pb-el')];
+    roots.forEach((el, i) => {
+        const next = roots[i + 1];
+        if (!next || el.dataset.elType !== 'section' || next.dataset.elType !== 'section') return;
+        const zone = document.createElement('div');
+        zone.className = 'pb-section-inserter';
+        zone.dataset.beforeId = next.dataset.elId;
+        zone.innerHTML = `<button type="button" class="pb-section-inserter-btn" title="Adicionar uma seção aqui">${icon('plus', 16)}</button>`;
+        zone.querySelector('button').onclick = (e) => {
+            e.stopPropagation();
+            if (state.insertSectionBefore) state.insertSectionBefore(parseInt(next.dataset.elId));
+        };
+        dz.insertBefore(zone, next);
+    });
+}
+
 function currentDevice(state) {
     return (state && state.responsiveMode) || 'desktop';
 }
@@ -56,6 +107,7 @@ export function renderCanvas(state, elements, parentEl) {
         const device = currentDevice(state);
         const values = valuesForDevice(el, device);
         div.innerHTML = elementHtml(el, device);
+        applyWrapperStyles(div, values.styles);
         div.onclick = (e) => { e.stopPropagation(); state.onSelectElement(el.id, e.ctrlKey || e.metaKey); };
         if (el.type === 'column') {
             // The .pb-el wrapper is the flex item inside the parent row, so it carries the width
@@ -105,6 +157,7 @@ export function renderCanvas(state, elements, parentEl) {
         }
     });
     if (!parentEl) {
+        addSectionInserters(state, dz);
         state.renderMath();
         setTimeout(() => initCanvasFeatures(), 100);
     }
@@ -353,12 +406,13 @@ export function elementHtml(el, device = 'desktop') {
         }
         case 'section': {
             const bgColor = s.background_color || 'transparent';
-            const pt = s.padding_top || '40px';
-            const pr = s.padding_right || '0px';
-            const pb = s.padding_bottom || '40px';
-            const pl = s.padding_left || '0px';
-            const mt = s.margin_top || '0px';
-            const mb = s.margin_bottom || '0px';
+            // "20" typed without a unit means 20px (SectionWidget does the same)
+            const pt = cssLength('padding-top', s.padding_top || '40px');
+            const pr = cssLength('padding-right', s.padding_right || '0px');
+            const pb = cssLength('padding-bottom', s.padding_bottom || '40px');
+            const pl = cssLength('padding-left', s.padding_left || '0px');
+            const mt = cssLength('margin-top', s.margin_top || '10px');
+            const mb = cssLength('margin-bottom', s.margin_bottom || '10px');
             const br = s.border_radius || '0px';
             const cw = s.content_width || '1140px';
             const layout = s.layout || 'boxed';

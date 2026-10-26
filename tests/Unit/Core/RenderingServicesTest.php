@@ -8,14 +8,12 @@ use App\Jobs\ImportHtmlJob;
 use App\Models\Element;
 use App\Models\GlobalWidget;
 use App\Models\Page;
-use App\Models\Popup;
 use App\Models\Revision;
 use App\Models\User;
 use App\Services\PageBuilder\Core\ElementManager;
 use App\Services\PageBuilder\Core\Renderer;
 use App\Services\PageBuilder\Core\WidgetManager;
 use App\Services\PageBuilder\GlobalWidget\GlobalWidgetService;
-use App\Services\PageBuilder\Popup\PopupService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -128,6 +126,28 @@ class RenderingServicesTest extends TestCase
         $this->assertNull(app(Renderer::class)->getWidgetControls('nope'));
     }
 
+    public function test_sections_get_10px_vertical_margin_by_default_and_it_can_change(): void
+    {
+        $this->add('section');
+        $this->assertStringContainsString('margin: 10px 0 10px 0', $this->render());
+
+        $custom = $this->add('section', ['margin_top' => '40', 'margin_bottom' => '0px']);
+        $this->assertStringContainsString('margin: 40px 0 0px 0', $this->render(), 'a bare number means px');
+        $this->assertSame('40', $custom->settings['margin_top']);
+    }
+
+    public function test_padding_and_margin_from_the_dimensions_control_reach_the_page(): void
+    {
+        $el = $this->add('video', ['video_type' => 'youtube', 'video_url' => 'https://www.youtube.com/watch?v=aGhRCf0Hk5Y']);
+        // saved before units were added automatically: "15" must still work
+        $el->update(['styles' => ['marginTop' => '15', 'paddingLeft' => '8px', 'line_height' => '1.5']]);
+
+        $html = $this->render();
+
+        $this->assertMatchesRegularExpression('/data-element-id="' . $el->id . '"[^>]*style="[^"]*margin-top: 15px;[^"]*padding-left: 8px;/', $html);
+        $this->assertStringContainsString('line-height: 1.5;', $html, 'line-height keeps its unitless multiplier');
+    }
+
     // ------------------------------------------------------------- WidgetManager
 
     public function test_widget_manager_categories_and_lookup(): void
@@ -149,7 +169,7 @@ class RenderingServicesTest extends TestCase
         $this->assertFalse($fresh->hasWidget('heading'));
     }
 
-    // ---------------------------------------------------- Global widgets / popups
+    // ------------------------------------------------------------ Global widgets
 
     public function test_global_widget_renders_and_syncs_into_an_element(): void
     {
@@ -168,19 +188,6 @@ class RenderingServicesTest extends TestCase
         $this->assertSoftDeleted($gw);
     }
 
-    public function test_only_published_popups_are_rendered(): void
-    {
-        $content = Page::factory()->create(['user_id' => $this->user->id]);
-        app(ElementManager::class)->create($content, 'heading', ['title' => 'Oferta do popup']);
-        $popup = Popup::create(['user_id' => $this->user->id, 'page_id' => $content->id, 'title' => 'Promo', 'slug' => 'promo', 'type' => 'popup', 'status' => 'draft']);
-        $service = app(PopupService::class);
-
-        $this->assertSame('', $service->renderPopup($popup));
-
-        $popup->update(['status' => 'published', 'published_at' => now()]);
-        $service->clearCache();
-        $this->assertStringContainsString('Oferta do popup', $service->renderAllPopups());
-    }
 
     // ---------------------------------------------------------------------- Jobs
 

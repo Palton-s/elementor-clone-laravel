@@ -6,7 +6,6 @@ use App\Models\CustomFont;
 use App\Models\Element;
 use App\Models\GlobalWidget;
 use App\Models\Page;
-use App\Models\Popup;
 use App\Models\ThemeTemplate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +17,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Popups, theme templates, global widgets, fonts, uploads, find & replace and collaboration:
+ * Theme templates, global widgets, fonts, uploads, find & replace and collaboration:
  * the owner can use them, another editor gets 403 on every route.
  */
 class OwnershipAndResourcesTest extends TestCase
@@ -45,7 +44,6 @@ class OwnershipAndResourcesTest extends TestCase
         $page = $this->page();
 
         return [
-            'popup' => Popup::create(['user_id' => $this->owner->id, 'page_id' => $page->id, 'title' => 'P', 'slug' => 'p-' . Str::random(6), 'type' => 'popup']),
             'theme_template' => ThemeTemplate::create(['user_id' => $this->owner->id, 'page_id' => $this->page()->id, 'title' => 'T', 'slug' => 't-' . Str::random(6), 'type' => 'header']),
             'global_widget' => GlobalWidget::create(['user_id' => $this->owner->id, 'title' => 'G', 'type' => 'heading', 'settings' => ['title' => 'x']]),
             'custom_font' => CustomFont::create(['user_id' => $this->owner->id, 'name' => 'F', 'family' => 'Fam']),
@@ -55,17 +53,6 @@ class OwnershipAndResourcesTest extends TestCase
     public static function protectedRoutes(): array
     {
         return [
-            ['GET', 'page-builder.popups.edit', 'popup'],
-            ['GET', 'page-builder.popups.editor', 'popup'],
-            ['GET', 'page-builder.popups.render', 'popup'],
-            ['GET', 'page-builder.popups.triggers', 'popup'],
-            ['PUT', 'page-builder.popups.triggers.update', 'popup'],
-            ['GET', 'page-builder.popups.conditions', 'popup'],
-            ['PUT', 'page-builder.popups.conditions.update', 'popup'],
-            ['PUT', 'page-builder.popups.update', 'popup'],
-            ['POST', 'page-builder.popups.publish', 'popup'],
-            ['POST', 'page-builder.popups.unpublish', 'popup'],
-            ['DELETE', 'page-builder.popups.destroy', 'popup'],
             ['GET', 'page-builder.themes.edit', 'theme_template'],
             ['GET', 'page-builder.themes.editor', 'theme_template'],
             ['GET', 'page-builder.themes.render', 'theme_template'],
@@ -87,7 +74,7 @@ class OwnershipAndResourcesTest extends TestCase
         $resource = $this->resources()[$param];
 
         $response = $this->actingAs($this->intruder)->json($method, route($route, [$param => $resource->id]), [
-            'title' => 'hack', 'type' => $resource->type ?? 'popup', 'name' => 'hack', 'family' => 'hack',
+            'title' => 'hack', 'type' => $resource->type ?? 'heading', 'name' => 'hack', 'family' => 'hack',
         ]);
 
         $response->assertForbidden();
@@ -100,7 +87,7 @@ class OwnershipAndResourcesTest extends TestCase
         $resource = $this->resources()[$param];
 
         $response = $this->actingAs($this->owner)->json($method, route($route, [$param => $resource->id]), [
-            'title' => 'Novo', 'type' => $resource->type ?? 'popup', 'name' => 'Novo', 'family' => 'Fam',
+            'title' => 'Novo', 'type' => $resource->type ?? 'heading', 'name' => 'Novo', 'family' => 'Fam',
         ]);
 
         $this->assertNotSame(403, $response->status(), "{$route} must allow the owner");
@@ -109,17 +96,28 @@ class OwnershipAndResourcesTest extends TestCase
 
     public function test_guests_are_redirected_to_login(): void
     {
-        $this->get(route('page-builder.popups.index'))->assertRedirect('/login');
         $this->get(route('page-builder.themes.index'))->assertRedirect('/login');
     }
 
     public function test_index_pages_list_only_own_resources(): void
     {
         $this->resources();
-        $theirs = Popup::create(['user_id' => $this->intruder->id, 'page_id' => $this->page($this->intruder)->id, 'title' => 'Popup Alheio', 'slug' => 'alheio', 'type' => 'popup']);
+        ThemeTemplate::create(['user_id' => $this->intruder->id, 'page_id' => $this->page($this->intruder)->id, 'title' => 'Cabeçalho Alheio', 'slug' => 'alheio', 'type' => 'header']);
 
-        $this->actingAs($this->owner)->get(route('page-builder.popups.index'))->assertOk()->assertDontSee('Popup Alheio');
-        $this->actingAs($this->intruder)->get(route('page-builder.popups.index'))->assertOk()->assertSee($theirs->title);
+        $this->actingAs($this->owner)->get(route('page-builder.themes.index'))->assertOk()->assertDontSee('Cabeçalho Alheio');
+        $this->actingAs($this->intruder)->get(route('page-builder.themes.index'))->assertOk()->assertSee('Cabeçalho Alheio');
+    }
+
+    public function test_popups_feature_was_removed(): void
+    {
+        $this->assertFalse(Route::has('page-builder.popups.index'));
+        $this->actingAs($this->owner)->get('/page-builder/popups')->assertNotFound();
+
+        $page = $this->page();
+        $page->update(['status' => 'published']);
+        $html = app(\App\Services\PageBuilder\Theme\ThemeService::class)->renderPageWithTheme($page->fresh());
+        $this->assertStringNotContainsString('pb-popup', $html);
+        $this->assertStringNotContainsString('PopupManager', $html);
     }
 
     // ------------------------------------------------------------------- uploads

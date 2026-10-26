@@ -3,7 +3,6 @@
 namespace Tests\Unit\Core;
 
 use App\Models\Page;
-use App\Models\Popup;
 use App\Models\Project;
 use App\Models\ThemeTemplate;
 use App\Models\User;

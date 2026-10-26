@@ -165,33 +165,6 @@ class TemplateManagerTest extends TestCase
         $this->assertNull($this->manager->themeTemplate('nonexistent'));
     }
 
-    public function test_lists_popup_templates_with_settings(): void
-    {
-        $list = $this->manager->popupTemplateList();
 
-        $this->assertArrayHasKey('popup-newsletter', $list);
-        $this->assertArrayHasKey('popup-announcement', $list);
-        $this->assertCount(2, $list);
 
-        $newsletter = $this->manager->popupTemplate('popup-newsletter');
-        $this->assertArrayHasKey('popup_settings', $newsletter);
-        $this->assertArrayHasKey('width', $newsletter['popup_settings']);
-    }
-
-    public function test_apply_popup_template_creates_elements(): void
-    {
-        $this->manager->applyPopupTemplate($this->page, 'popup-newsletter');
-
-        $this->assertGreaterThan(0, $this->page->elements()->count());
-        $this->assertTrue($this->manager->hasPopupTemplate('popup-newsletter'));
-        $this->assertFalse($this->manager->hasPopupTemplate('nonexistent'));
-    }
-
-    public function test_apply_invalid_popup_template_does_nothing(): void
-    {
-        $this->manager->applyPopupTemplate($this->page, 'nonexistent');
-
-        $this->assertEquals(0, $this->page->elements()->count());
-        $this->assertNull($this->manager->popupTemplate('nonexistent'));
-    }
 }

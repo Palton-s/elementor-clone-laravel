@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\PageBuilder;
 
 use App\Http\Controllers\Controller;
-use App\Models\Popup;
 use App\Models\Project;
 use App\Models\ThemeTemplate;
 use App\Models\Page;
@@ -25,7 +24,7 @@ class ProjectController extends Controller
 
         $projects = Project::query()
             ->when(!$user->isAdmin(), fn ($q) => $q->where('user_id', $user->id))
-            ->withCount(['pages', 'themeTemplates', 'popups'])
+            ->withCount(['pages', 'themeTemplates'])
             ->orderByDesc('is_default')
             ->latest()
             ->get();
@@ -39,13 +38,12 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        $project->loadCount(['pages', 'themeTemplates', 'popups']);
+        $project->loadCount(['pages', 'themeTemplates']);
 
         $pages = $project->pages()->latest()->limit(10)->get();
         $themes = $project->themeTemplates()->latest()->limit(10)->get();
-        $popups = $project->popups()->latest()->limit(10)->get();
 
-        return view('page-builder.projects.show', compact('project', 'pages', 'themes', 'popups'));
+        return view('page-builder.projects.show', compact('project', 'pages', 'themes'));
     }
 
     public function exportZip(Project $project, SiteExporter $exporter)
@@ -125,7 +123,7 @@ class ProjectController extends Controller
         $this->authorize('update', $project);
 
         $validated = $request->validate([
-            'type' => ['required', Rule::in(['page', 'theme_template', 'popup'])],
+            'type' => ['required', Rule::in(['page', 'theme_template'])],
             'ids' => 'required|array',
             'ids.*' => 'integer',
         ]);
@@ -133,7 +131,6 @@ class ProjectController extends Controller
         $model = match ($validated['type']) {
             'page' => Page::class,
             'theme_template' => ThemeTemplate::class,
-            'popup' => Popup::class,
         };
 
         $moved = $model::query()

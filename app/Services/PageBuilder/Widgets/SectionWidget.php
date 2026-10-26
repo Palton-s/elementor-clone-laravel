@@ -2,6 +2,8 @@
 
 namespace App\Services\PageBuilder\Widgets;
 
+use App\Services\PageBuilder\Core\Renderer;
+
 class SectionWidget extends BaseWidget
 {
     public function __construct()
@@ -41,8 +43,8 @@ class SectionWidget extends BaseWidget
             'padding_bottom' => '40px',
             'padding_left' => '0px',
             'padding_right' => '0px',
-            'margin_top' => '0px',
-            'margin_bottom' => '0px',
+            'margin_top' => '10px',
+            'margin_bottom' => '10px',
             'border_radius' => '0px',
             'box_shadow' => 'none',
             'z_index' => 'auto',
@@ -119,12 +121,12 @@ class SectionWidget extends BaseWidget
         $bgPosition = $settings['background_position'];
         $bgSize = $settings['background_size'];
         $bgRepeat = $settings['background_repeat'];
-        $paddingTop = $settings['padding_top'];
-        $paddingBottom = $settings['padding_bottom'];
-        $paddingLeft = $settings['padding_left'];
-        $paddingRight = $settings['padding_right'];
-        $marginTop = $settings['margin_top'];
-        $marginBottom = $settings['margin_bottom'];
+        $paddingTop = Renderer::cssLength('padding-top', (string) $settings['padding_top']);
+        $paddingBottom = Renderer::cssLength('padding-bottom', (string) $settings['padding_bottom']);
+        $paddingLeft = Renderer::cssLength('padding-left', (string) $settings['padding_left']);
+        $paddingRight = Renderer::cssLength('padding-right', (string) $settings['padding_right']);
+        $marginTop = Renderer::cssLength('margin-top', (string) $settings['margin_top']);
+        $marginBottom = Renderer::cssLength('margin-bottom', (string) $settings['margin_bottom']);
         $borderRadius = $settings['border_radius'];
         $zIndex = $settings['z_index'];
         $parallax = $settings['parallax'];
@@ -279,12 +281,12 @@ HTML;
         $layout = $settings['layout'];
         $bgColor = $settings['background_color'];
         $bgImage = $settings['background_image'];
-        $paddingTop = $settings['padding_top'];
-        $paddingBottom = $settings['padding_bottom'];
-        $paddingLeft = $settings['padding_left'];
-        $paddingRight = $settings['padding_right'];
-        $marginTop = $settings['margin_top'];
-        $marginBottom = $settings['margin_bottom'];
+        $paddingTop = Renderer::cssLength('padding-top', (string) $settings['padding_top']);
+        $paddingBottom = Renderer::cssLength('padding-bottom', (string) $settings['padding_bottom']);
+        $paddingLeft = Renderer::cssLength('padding-left', (string) $settings['padding_left']);
+        $paddingRight = Renderer::cssLength('padding-right', (string) $settings['padding_right']);
+        $marginTop = Renderer::cssLength('margin-top', (string) $settings['margin_top']);
+        $marginBottom = Renderer::cssLength('margin-bottom', (string) $settings['margin_bottom']);
         $borderRadius = $settings['border_radius'];
         $contentWidth = $settings['content_width'];
 

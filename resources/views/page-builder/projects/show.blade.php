@@ -18,7 +18,7 @@
                         <span style="color:rgba(255,255,255,.6);font-size:.8rem">Projetos / {{ $project->name }}</span>
                     </div>
                     <h1 class="pb-hero-title">{{ $project->name }}</h1>
-                    <p class="pb-hero-sub">{{ $project->description ?: "Gerencie páginas, temas e popups deste projeto" }}</p>
+                    <p class="pb-hero-sub">{{ $project->description ?: "Gerencie páginas e temas deste projeto" }}</p>
                 </div>
                 <div style="display:flex;gap:.6rem;align-items:center;position:relative;z-index:2">
                     @if($project->pages_count > 0)
@@ -42,10 +42,6 @@
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                                 Novo Tema
                             </a>
-                            <a href="{{ route("page-builder.popups.create") }}?project={{ $project->id }}" class="pb-dropdown-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-                                Novo Popup
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -59,11 +55,6 @@
                 <div class="pb-stat">
                     <span class="pb-stat-number">{{ $project->theme_templates_count ?? $themes->count() }}</span>
                     <span class="pb-stat-label">Temas</span>
-                </div>
-                <div class="pb-stat-divider"></div>
-                <div class="pb-stat">
-                    <span class="pb-stat-number">{{ $project->popups_count ?? $popups->count() }}</span>
-                    <span class="pb-stat-label">Popups</span>
                 </div>
             </div>
         </div>
@@ -88,18 +79,6 @@
                         <span class="badge badge-published">{{ $project->theme_templates_count ?? $themes->count() }}</span>
                     </div>
                     <span class="pb-card-slug">Cabeçalho, rodapé, artigo e listagem</span>
-                </div>
-                <div class="pb-card-footer">
-                    <span class="pb-card-edit-btn">Gerenciar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
-                </div>
-            </a>
-            <a href="{{ route("page-builder.popups.index") }}?project={{ $project->id }}" class="pb-page-card" style="text-decoration:none">
-                <div class="pb-card-body">
-                    <div class="pb-card-title-row">
-                        <h3 class="pb-card-title">Popups</h3>
-                        <span class="badge badge-published">{{ $project->popups_count ?? $popups->count() }}</span>
-                    </div>
-                    <span class="pb-card-slug">Gatilhos, condições e exibição</span>
                 </div>
                 <div class="pb-card-footer">
                     <span class="pb-card-edit-btn">Gerenciar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>

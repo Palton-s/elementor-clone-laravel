@@ -9,7 +9,6 @@ use App\Services\PageBuilder\Core\Renderer;
 use App\Services\PageBuilder\Core\PageBuilderService;
 use App\Services\PageBuilder\Core\TemplateManager;
 use App\Services\PageBuilder\Core\CollaborationService;
-use App\Services\PageBuilder\Popup\PopupService;
 use App\Services\PageBuilder\GlobalWidget\GlobalWidgetService;
 use Illuminate\Support\ServiceProvider;
 
@@ -55,11 +54,6 @@ class PageBuilderServiceProvider extends ServiceProvider
             return new CollaborationService();
         });
 
-        $this->app->singleton(PopupService::class, function ($app) {
-            return new PopupService(
-                $app->make(Renderer::class)
-            );
-        });
 
         $this->app->singleton(GlobalWidgetService::class, function ($app) {
             return new GlobalWidgetService(

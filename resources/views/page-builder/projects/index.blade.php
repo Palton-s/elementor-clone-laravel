@@ -12,7 +12,7 @@
                 <div>
                     <div class="pb-hero-badge">Central de projetos</div>
                     <h1 class="pb-hero-title">Meus Projetos</h1>
-                    <p class="pb-hero-sub">Selecione um projeto para gerenciar páginas, temas e popups</p>
+                    <p class="pb-hero-sub">Selecione um projeto para gerenciar páginas e temas</p>
                 </div>
                 <div style="display:flex;gap:.6rem;align-items:center;position:relative;z-index:2">
                     <button onclick="document.getElementById('create-project-modal').style.display='flex'" class="pb-hero-btn-ghost" style="display:flex;align-items:center;gap:.4rem">
@@ -43,11 +43,6 @@
                 <div class="pb-stat">
                     <span class="pb-stat-number">{{ $projects->sum('theme_templates_count') }}</span>
                     <span class="pb-stat-label">Temas</span>
-                </div>
-                <div class="pb-stat-divider"></div>
-                <div class="pb-stat">
-                    <span class="pb-stat-number">{{ $projects->sum('popups_count') }}</span>
-                    <span class="pb-stat-label">Popups</span>
                 </div>
             </div>
         </div>
@@ -95,7 +90,7 @@
                         </div>
                         <div class="pb-card-footer">
                             <div class="pb-card-status">
-                                <span class="pb-card-date">{{ $project->pages_count }} páginas • {{ $project->theme_templates_count }} temas • {{ $project->popups_count }} popups</span>
+                                <span class="pb-card-date">{{ $project->pages_count }} páginas • {{ $project->theme_templates_count }} temas</span>
                             </div>
                             <span class="pb-card-edit-btn">Abrir</span>
                         </div>
@@ -106,7 +101,7 @@
             <div class="empty-state">
                 <div class="empty-icon">&#128193;</div>
                 <h2>Nenhum projeto</h2>
-                <p>Crie seu primeiro projeto para organizar páginas, temas e popups.</p>
+                <p>Crie seu primeiro projeto para organizar páginas e temas.</p>
                 <button onclick="document.getElementById('create-project-modal').style.display='flex'" class="btn btn-primary" style="margin-top:1rem">Criar primeiro projeto</button>
             </div>
         @endif

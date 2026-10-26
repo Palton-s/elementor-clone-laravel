@@ -3,7 +3,6 @@
 namespace App\Services\PageBuilder\Project;
 
 use App\Models\Page;
-use App\Models\Popup;
 use App\Models\Project;
 use App\Models\ThemeTemplate;
 use App\Models\User;
@@ -66,7 +65,6 @@ class ProjectService
 
         Page::where('project_id', $project->id)->update(['project_id' => $targetId]);
         ThemeTemplate::where('project_id', $project->id)->update(['project_id' => $targetId]);
-        Popup::where('project_id', $project->id)->update(['project_id' => $targetId]);
     }
 
     public function ensureDefaultProject(User $user): Project

@@ -5,18 +5,15 @@ namespace App\Services\PageBuilder\Theme;
 use App\Models\Page;
 use App\Models\ThemeTemplate;
 use App\Services\PageBuilder\Core\Renderer;
-use App\Services\PageBuilder\Popup\PopupService;
 use Illuminate\Support\Facades\Cache;
 
 class ThemeService
 {
     protected Renderer $renderer;
-    protected PopupService $popupService;
 
-    public function __construct(Renderer $renderer, PopupService $popupService)
+    public function __construct(Renderer $renderer)
     {
         $this->renderer = $renderer;
-        $this->popupService = $popupService;
     }
 
     public function resolveTemplate(string $type, ?string $pageSlug = null): ?ThemeTemplate
@@ -85,45 +82,6 @@ class ThemeService
 
         $styles = $this->renderer->renderStyles($page, $hasMath);
         $scripts = $this->renderer->renderScripts($page, $hasMath);
-        $popups = $this->popupService->renderAllPopups();
-        $popupScript = $popups === '' ? '' : <<<'JS'
-<script>
-(function () {
-    function open(popup) {
-        if (document.querySelector('.pb-popup-overlay[style*="flex"]')) return;
-        popup.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-    function close(popup) {
-        popup.style.display = 'none';
-        document.body.style.overflow = '';
-    }
-    document.querySelectorAll('.pb-popup-overlay').forEach(function (popup) {
-        var triggers = [];
-        try { triggers = JSON.parse(popup.dataset.triggers || '[]'); } catch (e) {}
-        var closeBtn = popup.querySelector('.pb-popup-close');
-        if (closeBtn) closeBtn.addEventListener('click', function () { close(popup); });
-        popup.addEventListener('click', function (e) { if (e.target === popup) close(popup); });
-        triggers.forEach(function (trigger) {
-            if (trigger.type === 'on_load') open(popup);
-            else if (trigger.type === 'on_timer') setTimeout(function () { open(popup); }, (trigger.value || 3) * 1000);
-            else if (trigger.type === 'on_scroll') window.addEventListener('scroll', function () {
-                if (popup.dataset.triggered) return;
-                var max = document.documentElement.scrollHeight - window.innerHeight;
-                if (max > 0 && (window.scrollY / max) * 100 >= (parseFloat(trigger.value) || 50)) { popup.dataset.triggered = '1'; open(popup); }
-            });
-            else if (trigger.type === 'on_exit') document.addEventListener('mouseleave', function (e) {
-                if (e.clientY <= 0 && !popup.dataset.triggered) { popup.dataset.triggered = '1'; open(popup); }
-            });
-            else if (trigger.type === 'on_click' && trigger.value) document.querySelectorAll(trigger.value).forEach(function (el) {
-                el.addEventListener('click', function () { open(popup); });
-            });
-        });
-    });
-})();
-</script>
-JS;
-
         $pageInnerStyle = "max-width: {$containerWidth}; margin: 0 auto; padding: {$contentPadding};";
 
         return <<<HTML
@@ -148,8 +106,6 @@ JS;
         {$pageHtml}
     </div>
     {$footerHtml}
-    {$popups}
-    {$popupScript}
 </body>
 </html>
 HTML;

@@ -11,7 +11,7 @@ const CANVAS_SORTABLE_OPTIONS = {
     dragClass: 'pb-sortable-drag',
     handle: '.pb-el-drag',
     draggable: '.pb-el',
-    filter: '.pb-empty-drop, .pb-empty-canvas',
+    filter: '.pb-empty-drop, .pb-empty-canvas, .pb-section-inserter',
     preventOnFilter: false,
     fallbackOnBody: true,
     swapThreshold: 0.65,
@@ -102,6 +102,21 @@ export function createElementAt(state, type, parentId, insertBeforeId) {
         if (res && res.element && res.element.id) state.onSelectElement(res.element.id);
     }))
     .catch(err => toastError('Falha ao adicionar elemento: ' + (err.message || err)));
+}
+
+/**
+ * New top-level section before another one (the "+" between two sections), created with a
+ * full-width column so widgets can be dropped into it right away.
+ */
+export function insertSectionBefore(state, beforeId) {
+    const headers = { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf };
+    const create = (body) => apiFetch(`/page-builder/pages/${state.pageId}/elements`, { method: 'POST', headers, body: JSON.stringify(body) });
+
+    state.showToast('Adicionando seção...', 'info');
+    return create({ type: 'section', parent_id: null, insert_before_id: beforeId })
+        .then(res => create({ type: 'column', parent_id: res.element.id, settings: { column_width: 100 } }).then(() => res.element.id))
+        .then(sectionId => Promise.resolve(state.loadElements()).then(() => state.onSelectElement(sectionId)))
+        .catch(err => toastError('Falha ao adicionar seção: ' + (err.message || err)));
 }
 
 // ---- Click-to-insert: the "+" inside containers picks a target, a click in the Inserir panel fills it

@@ -106,36 +106,6 @@ class TemplateManager
         $this->importElements($page, $template['elements']);
     }
 
-    public function popupTemplateList(): array
-    {
-        $list = [];
-        foreach ($this->popupTemplates() as $key => $tmpl) {
-            $list[$key] = ['name' => $tmpl['name'], 'description' => $tmpl['description']];
-        }
-        return $list;
-    }
-
-    public function popupTemplate(string $key): ?array
-    {
-        return $this->popupTemplates()[$key] ?? null;
-    }
-
-    public function hasPopupTemplate(string $key): bool
-    {
-        return isset($this->popupTemplates()[$key]);
-    }
-
-    public function applyPopupTemplate(Page $page, string $key): void
-    {
-        $template = $this->popupTemplate($key);
-        if (!$template) return;
-
-        $page->settings = array_merge($page->settings ?? [], $template['settings']);
-        $page->save();
-
-        $this->importElements($page, $template['elements']);
-    }
-
     protected function importElements(Page $page, array $elements, ?int $parentId = null, ?string $widgetType = null): void
     {
         foreach ($elements as $index => $elData) {
@@ -675,44 +645,6 @@ class TemplateManager
                             ['type' => 'callout', 'settings' => ['type' => 'info', 'title' => 'Resultado 1', 'content' => '<p style="color:#475569;">Resumo do resultado encontrado. Clique para abrir o conteúdo completo. Duplicar este bloco para mais resultados.</p>']],
                             ['type' => 'callout', 'settings' => ['type' => 'info', 'title' => 'Resultado 2', 'content' => '<p style="color:#475569;">Resumo do segundo resultado. Substitua pelos resultados reais da busca.</p>']],
                             ['type' => 'callout', 'settings' => ['type' => 'info', 'title' => 'Resultado 3', 'content' => '<p style="color:#475569;">Resumo do terceiro resultado. Use o Navigator para duplicar quantos resultados forem necessários.</p>']],
-                        ]],
-                    ]],
-                ],
-            ],
-        ];
-    }
-
-    protected function popupTemplates(): array
-    {
-        return [
-            'popup-newsletter' => [
-                'name' => 'Newsletter',
-                'description' => 'Assinatura de e-mail com formulário',
-                'settings' => ['container_width' => '520px', 'page_background' => '#ffffff', 'content_padding' => '0px'],
-                'popup_settings' => ['width' => '480', 'position' => 'center', 'overlay' => '1', 'show_close_button' => '1'],
-                'elements' => [
-                    ['type' => 'section', 'settings' => ['layout' => 'boxed', 'background_color' => '#ffffff', 'padding_top' => '40px', 'padding_bottom' => '40px'], 'children' => [
-                        ['type' => 'column', 'settings' => ['column_width' => 'col-12', 'text_align' => 'center'], 'children' => [
-                            ['type' => 'icon', 'settings' => ['icon' => 'fas fa-envelope-open-text', 'size' => '44', 'color' => '#6366f1', 'alignment' => 'center', 'margin_bottom' => '16px']],
-                            ['type' => 'heading', 'settings' => ['title' => 'Fique por dentro!', 'tag' => 'h2', 'size' => 'medium', 'color' => '#0f172a', 'alignment' => 'center', 'font_weight' => '700', 'margin_bottom' => '12px']],
-                            ['type' => 'text', 'settings' => ['content' => '<p style="color:#64748b;">Receba novidades, dicas e ofertas exclusivas direto no seu e-mail.</p>', 'alignment' => 'center', 'font_size' => '15px', 'margin_bottom' => '24px']],
-                            ['type' => 'form', 'settings' => ['form_name' => 'Newsletter', 'fields' => [['label' => 'E-mail', 'placeholder' => 'seu@email.com', 'type' => 'email', 'required' => true, 'width' => '100']], 'button_text' => 'Assinar Grátis', 'button_color' => '#6366f1', 'button_text_color' => '#ffffff', 'button_width' => 'full', 'field_spacing' => 12, 'field_radius' => 6, 'success_message' => 'Inscrição realizada com sucesso!']],
-                        ]],
-                    ]],
-                ],
-            ],
-            'popup-announcement' => [
-                'name' => 'Anúncio',
-                'description' => 'Aviso central com callout e botão',
-                'settings' => ['container_width' => '520px', 'page_background' => '#0b1120', 'content_padding' => '0px'],
-                'popup_settings' => ['width' => '480', 'position' => 'center', 'overlay' => '1', 'show_close_button' => '1'],
-                'elements' => [
-                    ['type' => 'section', 'settings' => ['layout' => 'boxed', 'background_color' => '#0b1120', 'padding_top' => '40px', 'padding_bottom' => '40px'], 'children' => [
-                        ['type' => 'column', 'settings' => ['column_width' => 'col-12', 'text_align' => 'center'], 'children' => [
-                            ['type' => 'callout', 'settings' => ['type' => 'warning', 'title' => 'Novidade!', 'content' => '<p>Não perca: atualização 3.0 já disponível.</p>', 'show_icon' => true, 'border_radius' => '12px', 'margin_bottom' => '24px']],
-                            ['type' => 'heading', 'settings' => ['title' => 'Grande novidade no Page Builder', 'tag' => 'h2', 'size' => 'medium', 'color' => '#f8fafc', 'alignment' => 'center', 'font_weight' => '700', 'margin_bottom' => '12px']],
-                            ['type' => 'text', 'settings' => ['content' => '<p style="color:#94a3b8;">Confira as novas funcionalidades e comece a usar hoje mesmo.</p>', 'alignment' => 'center', 'font_size' => '15px', 'margin_bottom' => '24px']],
-                            ['type' => 'button', 'settings' => ['text' => 'Saiba Mais', 'link' => '#', 'link_target' => '_self', 'size' => 'medium', 'background_type' => 'gradient', 'background_gradient' => ['type' => 'linear', 'angle' => 135, 'color1' => '#6366f1', 'color2' => '#ec4899', 'position1' => 0, 'position2' => 100], 'text_color' => '#ffffff', 'border_radius' => '50px', 'padding_left_right' => '28px', 'font_weight' => '600', 'alignment' => 'center']],
                         ]],
                     ]],
                 ],

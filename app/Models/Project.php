@@ -53,10 +53,6 @@ class Project extends Model
         return $this->hasMany(ThemeTemplate::class);
     }
 
-    public function popups(): HasMany
-    {
-        return $this->hasMany(Popup::class);
-    }
 
     public function scopeDefault($query)
     {

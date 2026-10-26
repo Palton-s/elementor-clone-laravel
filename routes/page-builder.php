@@ -12,7 +12,6 @@ use App\Http\Controllers\PageBuilder\CustomFontController;
 use App\Http\Controllers\PageBuilder\DynamicTagController;
 use App\Http\Controllers\PageBuilder\FindReplaceController;
 use App\Http\Controllers\PageBuilder\GlobalWidgetController;
-use App\Http\Controllers\PageBuilder\PopupController;
 use App\Http\Controllers\PageBuilder\ProjectController;
 
 Route::middleware(['web', 'auth'])->prefix('page-builder')->name('page-builder.')->group(function () {
@@ -109,15 +108,6 @@ Route::middleware(['web', 'auth'])->prefix('page-builder')->name('page-builder.'
     Route::delete('global-widgets/{global_widget}', [GlobalWidgetController::class, 'destroy'])->name('global-widgets.destroy');
     Route::get('global-widgets/{global_widget}/render', [GlobalWidgetController::class, 'render'])->name('global-widgets.render');
 
-    Route::resource('popups', PopupController::class)->except(['show']);
-    Route::get('popups/{popup}/editor', [PopupController::class, 'editor'])->name('popups.editor');
-    Route::get('popups/{popup}/render', [PopupController::class, 'render'])->name('popups.render');
-    Route::get('popups/{popup}/triggers', [PopupController::class, 'getTriggers'])->name('popups.triggers');
-    Route::put('popups/{popup}/triggers', [PopupController::class, 'updateTriggers'])->name('popups.triggers.update');
-    Route::get('popups/{popup}/conditions', [PopupController::class, 'getConditions'])->name('popups.conditions');
-    Route::put('popups/{popup}/conditions', [PopupController::class, 'updateConditions'])->name('popups.conditions.update');
-    Route::post('popups/{popup}/publish', [PopupController::class, 'publish'])->name('popups.publish');
-    Route::post('popups/{popup}/unpublish', [PopupController::class, 'unpublish'])->name('popups.unpublish');
 });
 
 Route::middleware(['web'])->prefix('page-builder')->name('page-builder.')->group(function () {

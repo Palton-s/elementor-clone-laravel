@@ -1,6 +1,6 @@
 import state from './state.js';
 import { escHtml, apiFetch, toastError } from './utils.js';
-import { renderMath, valuesForDevice, deviceOverrides, LEGACY_RESPONSIVE_KEYS } from './canvas.js';
+import { renderMath, valuesForDevice, deviceOverrides, LEGACY_RESPONSIVE_KEYS, applyWrapperStyles, cssLength } from './canvas.js';
 import { icon } from './icons.js';
 import { widgetLabel, elementName, optionText } from './i18n.js';
 import { snapshotHistory } from './history.js';
@@ -217,6 +217,10 @@ function saveValue(bucket, key, value, elementId, reload, scopedDevice) {
             document.querySelector(`.pb-el[data-el-id="${elementId}"]`)?.classList.add('selected');
         } else if (reload) {
             reloadElement(elementId);
+        }
+        // Margins, paddings and other wrapper styles live on the element box, not in the widget HTML
+        if (el && bucket === 'styles') {
+            applyWrapperStyles(document.querySelector(`.pb-el[data-el-id="${elementId}"]`), valuesForDevice(el, currentDevice()).styles);
         }
         snapshotHistory(state);
     })
@@ -1005,11 +1009,20 @@ function createBoxShadowInput(key, value, elementId) {
 function createDimensionsInput(key, value, elementId) {
     const c = document.createElement('div');
     c.style.cssText = 'display:flex;flex-direction:column;gap:.25rem';
-    const isLinked = { padding: true, margin: true };
+    const SIDE_LABELS = { Top: 'Cima', Right: 'Direita', Bottom: 'Baixo', Left: 'Esquerda' };
     const groups = [
         { prefix: 'padding', label: 'Espaçamento interno', keys: ['Top','Right','Bottom','Left'] },
         { prefix: 'margin', label: 'Margem', keys: ['Top','Right','Bottom','Left'] },
     ];
+    // Each side is its own style key (marginTop...): show what is saved for the device being edited
+    const saved = (fk) => {
+        const v = (state.cachedStyles || {})[fk];
+        return v === undefined || v === null ? '' : String(v);
+    };
+    // Sides start linked only when they are all equal (or empty)
+    const isLinked = {};
+    groups.forEach(g => { isLinked[g.prefix] = new Set(g.keys.map(k => saved(g.prefix + k))).size <= 1; });
+    const save = (fk, raw) => updateStyle(fk, cssLength(fk.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(), raw), elementId);
     groups.forEach(group => {
         const header = document.createElement('div');
         header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:.25rem';
@@ -1018,15 +1031,20 @@ function createDimensionsInput(key, value, elementId) {
         hLabel.textContent = group.label;
         header.appendChild(hLabel);
         const lockBtn = document.createElement('button');
-        lockBtn.type = 'button'; lockBtn.innerHTML = icon('link', 12);
-        lockBtn.title = 'Vincular valores';
-        lockBtn.style.cssText = 'background:none;border:1px solid var(--pb-border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:12px;transition:all .15s';
-        lockBtn.onclick = () => {
-            isLinked[group.prefix] = !isLinked[group.prefix];
+        lockBtn.type = 'button';
+        lockBtn.style.cssText = 'background:none;border:1px solid var(--pb-border);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:12px;transition:all .15s;display:inline-flex;align-items:center;color:var(--pb-text2)';
+        const paintLock = () => {
             lockBtn.innerHTML = isLinked[group.prefix] ? icon('link', 12) : icon('unlink', 12);
+            lockBtn.title = isLinked[group.prefix] ? 'Valores vinculados: mudar um muda os quatro' : 'Valores independentes';
             lockBtn.style.borderColor = isLinked[group.prefix] ? 'var(--pb-accent)' : 'var(--pb-border)';
         };
-        lockBtn.style.borderColor = 'var(--pb-accent)';
+        lockBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isLinked[group.prefix] = !isLinked[group.prefix];
+            paintLock();
+        };
+        paintLock();
         header.appendChild(lockBtn);
         c.appendChild(header);
         const grid = document.createElement('div');
@@ -1038,17 +1056,20 @@ function createDimensionsInput(key, value, elementId) {
             wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px';
             const sideLabel = document.createElement('span');
             sideLabel.style.cssText = 'font-size:10px;color:var(--pb-text2);text-transform:uppercase';
-            sideLabel.textContent = side;
+            sideLabel.textContent = SIDE_LABELS[side] || side;
             const inp = document.createElement('input');
-            inp.type = 'text'; inp.value = value || ''; inp.placeholder = '0';
+            inp.type = 'text'; inp.value = saved(fk); inp.placeholder = '0';
+            inp.id = `ctrl-${fk}`;
+            inp.title = 'Número em px (ex: 10) ou com unidade (ex: 1rem, 5%)';
             inp.style.cssText = 'width:100%;padding:4px;text-align:center;background:var(--pb-surface2);border:1px solid var(--pb-border);border-radius:4px;color:var(--pb-text);font-size:12px;box-sizing:border-box';
             inp.oninput = () => {
-                _debouncedStyle(fk, elementId, () => updateStyle(fk, inp.value, elementId));
+                _debouncedStyle(fk, elementId, () => save(fk, inp.value));
                 if (isLinked[group.prefix]) {
                     inputs.forEach((otherInp, oi) => {
                         if (oi !== idx) {
                             otherInp.value = inp.value;
-                            _debouncedStyle(group.prefix + group.keys[oi], elementId, () => updateStyle(group.prefix + group.keys[oi], inp.value, elementId));
+                            const otherKey = group.prefix + group.keys[oi];
+                            _debouncedStyle(otherKey, elementId, () => save(otherKey, inp.value));
                         }
                     });
                 }
