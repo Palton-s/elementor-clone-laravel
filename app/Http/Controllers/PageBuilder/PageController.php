@@ -10,6 +10,7 @@ use App\Services\PageBuilder\Core\PageBuilderService;
 use App\Services\PageBuilder\Core\ElementManager;
 use App\Services\PageBuilder\Core\Renderer;
 use App\Services\PageBuilder\Core\TemplateManager;
+use App\Services\PageBuilder\Export\SiteExporter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -97,7 +98,7 @@ class PageController extends Controller
 
         return $redirectTo === 'editor'
             ? redirect()->route('page-builder.editor', $page)
-            : redirect()->route('page-builder.pages.index')->with('success', "Page \"{$page->title}\" created successfully!");
+            : redirect()->route('page-builder.pages.index')->with('success', "Página \"{$page->title}\" criada!");
     }
 
     public function show(Page $page): View
@@ -124,7 +125,7 @@ class PageController extends Controller
         $templateKey = $request->input('template', 'blank');
 
         if (!$this->templateManager->has($templateKey)) {
-            return response()->json(['error' => 'Template not found'], 404);
+            return response()->json(['error' => 'Modelo não encontrado'], 404);
         }
 
         $template = $this->templateManager->get($templateKey);
@@ -143,7 +144,7 @@ class PageController extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => "Template \"{$template['name']}\" applied",
+                'message' => "Modelo \"{$template['name']}\" aplicado",
                 'page' => $page->fresh(),
             ]);
         } catch (\Exception $e) {
@@ -166,7 +167,7 @@ class PageController extends Controller
         $page->save();
 
         return response()->json([
-            'message' => 'Layout updated',
+            'message' => 'Layout atualizado',
             'page' => $page,
         ]);
     }
@@ -216,7 +217,7 @@ class PageController extends Controller
         $page->save();
 
         return response()->json([
-            'message' => 'Global settings updated',
+            'message' => 'Configurações globais atualizadas',
             'global_colors' => $settings['global_colors'] ?? [],
             'global_fonts' => $settings['global_fonts'] ?? [],
         ]);
@@ -263,7 +264,7 @@ class PageController extends Controller
         $page = $this->pageBuilder->updatePage($page, $validated);
 
         return response()->json([
-            'message' => 'Page updated successfully',
+            'message' => 'Página atualizada',
             'page' => $page,
         ]);
     }
@@ -275,7 +276,7 @@ class PageController extends Controller
         $page->delete();
 
         return redirect()->route('page-builder.pages.index')
-            ->with('success', "Page \"{$title}\" deleted successfully!");
+            ->with('success', "Página \"{$title}\" excluída!");
     }
 
     public function publish(Page $page): JsonResponse
@@ -285,7 +286,7 @@ class PageController extends Controller
         $page->save();
 
         return response()->json([
-            'message' => 'Page published successfully',
+            'message' => 'Página publicada',
             'page' => $page,
         ]);
     }
@@ -297,7 +298,7 @@ class PageController extends Controller
         $page->save();
 
         return response()->json([
-            'message' => 'Page unpublished successfully',
+            'message' => 'Página despublicada',
             'page' => $page,
         ]);
     }
@@ -306,7 +307,7 @@ class PageController extends Controller
     {
         $this->authorize('update', $page);
         $newPage = $page->replicate();
-        $newPage->title = $page->title . ' (copy)';
+        $newPage->title = $page->title . ' (cópia)';
         $newPage->slug = $page->slug . '-' . uniqid();
         $newPage->status = 'draft';
         $newPage->save();
@@ -326,7 +327,7 @@ class PageController extends Controller
         }
 
         return response()->json([
-            'message' => 'Page duplicated successfully',
+            'message' => 'Página duplicada',
             'page' => $newPage->fresh(),
         ]);
     }
@@ -345,6 +346,15 @@ class PageController extends Controller
         ]);
     }
 
+    public function exportZip(Page $page, SiteExporter $exporter)
+    {
+        $this->authorize('view', $page);
+        $zipPath = $exporter->exportPage($page);
+        $filename = (Str::slug($page->title) ?: 'pagina') . '.zip';
+
+        return response()->download($zipPath, $filename, ['Content-Type' => 'application/zip'])->deleteFileAfterSend(true);
+    }
+
     public function import(Request $request): JsonResponse
     {
         $this->authorize('create', Page::class);
@@ -358,7 +368,7 @@ class PageController extends Controller
         $page = $this->pageBuilder->importPage($validated['data']);
 
         return response()->json([
-            'message' => 'Page imported successfully',
+            'message' => 'Página importada',
             'page' => $page,
         ], 201);
     }

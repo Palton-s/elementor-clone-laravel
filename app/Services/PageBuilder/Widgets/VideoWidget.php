@@ -72,12 +72,13 @@ class VideoWidget extends BaseWidget
         $width = $settings['width'];
         $maxWidth = $settings['max_width'];
 
-        if ($videoType === 'upload' && !empty($videoFile)) {
-            return $this->renderLocalVideo($videoFile, $autoplay, $loop, $controls, $mute, $aspectRatio, $alignment, $width, $maxWidth);
+        $fileSource = $this->fileSource($videoType, $videoUrl, $videoFile);
+        if ($fileSource !== null) {
+            return $this->renderLocalVideo($fileSource, $autoplay, $loop, $controls, $mute, $aspectRatio, $alignment, $width, $maxWidth);
         }
 
         if (empty($videoUrl)) {
-            return '<div class="pb-video-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">No video selected</div>';
+            return '<div class="pb-video-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">Nenhum vídeo selecionado</div>';
         }
 
         $embedUrl = $this->getEmbedUrl($videoUrl, $videoType, $autoplay, $loop, $controls, $mute, $startTime, $endTime);
@@ -109,6 +110,24 @@ class VideoWidget extends BaseWidget
     </div>
 </div>
 HTML;
+    }
+
+    /**
+     * URL to play with a <video> tag, or null for an embed (YouTube/Vimeo).
+     * An uploaded file wins when the type is "upload" or no embed URL was given (uploads made
+     * before the type switched automatically kept "youtube"); a direct .mp4/.webm URL also plays natively.
+     */
+    private function fileSource($videoType, $videoUrl, $videoFile): ?string
+    {
+        [$videoType, $videoUrl, $videoFile] = [(string) $videoType, trim((string) $videoUrl), trim((string) $videoFile)];
+        if ($videoFile !== '' && ($videoType === 'upload' || $videoUrl === '')) {
+            return $videoFile;
+        }
+        if ($videoType !== 'upload' && $videoUrl !== '' && preg_match('/\.(mp4|webm|ogv|ogg|mov|m4v)(\?.*)?$/i', $videoUrl)) {
+            return $videoUrl;
+        }
+
+        return null;
     }
 
     private function renderLocalVideo(string $fileUrl, bool $autoplay, bool $loop, bool $controls, bool $mute, string $aspectRatio, string $alignment, string $width, string $maxWidth): string
@@ -154,12 +173,13 @@ HTML;
         $width = $settings['width'];
         $maxWidth = $settings['max_width'];
 
-        if ($videoType === 'upload' && !empty($videoFile)) {
-            return $this->renderLocalVideo($videoFile, false, false, true, false, $aspectRatio, $alignment, $width, $maxWidth);
+        $fileSource = $this->fileSource($videoType, $videoUrl, $videoFile);
+        if ($fileSource !== null) {
+            return $this->renderLocalVideo($fileSource, false, false, true, false, $aspectRatio, $alignment, $width, $maxWidth);
         }
 
         if (empty($videoUrl)) {
-            return '<div class="pb-video-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🎬 Click to add video</div>';
+            return '<div class="pb-video-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🎬 Clique para adicionar um vídeo</div>';
         }
 
         $embedUrl = $this->getEmbedUrl($videoUrl, $videoType, false, false, true, false, 0, 0);

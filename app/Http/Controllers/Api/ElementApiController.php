@@ -53,7 +53,7 @@ class ElementApiController extends Controller
         );
 
         return response()->json([
-            'message' => 'Element created',
+            'message' => 'Elemento criado',
             'element' => new ElementResource($element->load('children')),
         ], 201);
     }
@@ -81,7 +81,7 @@ class ElementApiController extends Controller
         $element = $this->pageBuilder->updateElement($element, $validated);
 
         return response()->json([
-            'message' => 'Element updated',
+            'message' => 'Elemento atualizado',
             'element' => new ElementResource($element->load('children')),
         ]);
     }
@@ -92,7 +92,7 @@ class ElementApiController extends Controller
         $this->pageBuilder->removeElement($element);
 
         return response()->json([
-            'message' => 'Element deleted',
+            'message' => 'Elemento excluído',
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services\PageBuilder\Widgets;
 
 use App\Contracts\PageBuilder\WidgetInterface;
+use App\Services\PageBuilder\Core\ControlTranslator;
 
 abstract class BaseWidget implements WidgetInterface
 {
@@ -23,7 +24,7 @@ abstract class BaseWidget implements WidgetInterface
 
     public function getLabel(): string
     {
-        return $this->label;
+        return ControlTranslator::widgetLabel($this->type, $this->label);
     }
 
     public function getIcon(): string

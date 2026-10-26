@@ -1,18 +1,18 @@
 @extends('page-builder.layouts.app')
 
-@section('title', 'Triggers - ' . $popup->title)
+@section('title', 'Quando exibir - ' . $popup->title)
 
 @section('content')
 <div class="container">
     <div class="page-header">
         <div>
-            <h1>Triggers: {{ $popup->title }}</h1>
+            <h1>Quando exibir: {{ $popup->title }}</h1>
             <p style="color:#64748b;font-size:.875rem;margin-top:.25rem">
-                Configure when this <strong>{{ ucfirst($popup->type) }}</strong> popup should appear
+                Defina quando este <strong>{{ $popup->type === 'modal' ? 'modal' : 'popup' }}</strong> deve aparecer
             </p>
         </div>
         <div style="display:flex;gap:.5rem">
-            <a href="{{ route('page-builder.popups.editor', $popup) }}" class="btn btn-info">✏️ Edit</a>
+            <a href="{{ route('page-builder.popups.editor', $popup) }}" class="btn btn-info">✏️ Editar</a>
             <a href="{{ route('page-builder.popups.index') }}" class="btn btn-secondary">&larr; Back</a>
         </div>
     </div>
@@ -24,16 +24,16 @@
 
             <div style="display:flex;gap:.5rem;margin-top:1rem">
                 <select id="trigger-type" class="form-control form-select" style="flex:1">
-                    <option value="">Select trigger...</option>
+                    <option value="">Selecione quando exibir...</option>
                 </select>
                 <div id="trigger-value-wrap" style="display:none;flex:1">
-                    <input type="text" id="trigger-value" class="form-control" placeholder="Value">
+                    <input type="text" id="trigger-value" class="form-control" placeholder="Valor">
                 </div>
-                <button id="add-trigger" class="btn btn-secondary" disabled>+ Add</button>
+                <button id="add-trigger" class="btn btn-secondary" disabled>+ Adicionar</button>
             </div>
 
             <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e2e8f0;display:flex;gap:.75rem">
-                <button id="save-triggers" class="btn btn-primary">Save Triggers</button>
+                <button id="save-triggers" class="btn btn-primary">Salvar</button>
                 <span id="save-status" style="font-size:.82rem;color:#64748b;align-self:center"></span>
             </div>
         </div>
@@ -41,16 +41,16 @@
 
     <div style="margin-top:1.5rem">
         <div class="card" style="background:#f8fafc;padding:1rem">
-            <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.5rem">How Triggers Work</h3>
+            <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.5rem">Como funciona</h3>
             <ul style="font-size:.82rem;color:#64748b;line-height:1.8;padding-left:1.25rem">
-                <li><strong>On Page Load</strong> — Popup appears immediately when the page loads</li>
-                <li><strong>After Timer</strong> — Popup appears after a specified number of seconds</li>
-                <li><strong>On Scroll</strong> — Popup appears when user scrolls past a certain percentage of the page</li>
-                <li><strong>Exit Intent</strong> — Popup appears when the mouse leaves the viewport (user is about to close)</li>
-                <li><strong>On Click</strong> — Popup appears when user clicks an element matching a CSS selector</li>
+                <li><strong>Ao carregar a página</strong> — o popup aparece assim que a página abre</li>
+                <li><strong>Após um tempo</strong> — o popup aparece depois de alguns segundos</li>
+                <li><strong>Ao rolar</strong> — o popup aparece quando a pessoa rola além de uma porcentagem da página</li>
+                <li><strong>Intenção de saída</strong> — o popup aparece quando o mouse sai da janela (a pessoa vai fechar a página)</li>
+                <li><strong>Ao clicar</strong> — o popup aparece quando a pessoa clica num elemento que corresponde a um seletor CSS</li>
             </ul>
             <p style="font-size:.78rem;color:#94a3b8;margin-top:.5rem">
-                Multiple triggers act as OR — the popup will appear on ANY matching trigger.
+                Com várias regras, basta UMA delas acontecer para o popup aparecer.
             </p>
         </div>
     </div>
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderTypeOptions() {
-        triggerType.innerHTML = '<option value="">Select trigger...</option>';
+        triggerType.innerHTML = '<option value="">Selecione quando exibir...</option>';
         for (const [key, config] of Object.entries(triggerTypes)) {
             const opt = document.createElement('option');
             opt.value = key;
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderTriggers() {
         if (triggers.length === 0) {
-            triggersList.innerHTML = '<div style="padding:1rem;text-align:center;color:#94a3b8;font-size:.85rem;background:#f8fafc;border-radius:8px">No triggers — popup will not appear automatically</div>';
+            triggersList.innerHTML = '<div style="padding:1rem;text-align:center;color:#94a3b8;font-size:.85rem;background:#f8fafc;border-radius:8px">Nenhuma regra — o popup não vai aparecer sozinho</div>';
             return;
         }
 
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasValue = opt.dataset.hasValue === 'true';
         triggerValueWrap.style.display = hasValue ? 'block' : 'none';
         if (hasValue) {
-            triggerValue.placeholder = opt.dataset.placeholder || 'Value';
+            triggerValue.placeholder = opt.dataset.placeholder || 'Valor';
         }
         addBtn.disabled = !this.value;
     });
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveBtn.addEventListener('click', function() {
         saveBtn.disabled = true;
-        saveStatus.textContent = 'Saving...';
+        saveStatus.textContent = 'Salvando...';
 
         fetch('{{ route('page-builder.popups.triggers.update', $popup) }}', {
             method: 'PUT',
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => { saveStatus.textContent = ''; }, 3000);
         })
         .catch(err => {
-            saveStatus.textContent = '❌ Error: ' + err.message;
+            saveStatus.textContent = '❌ Erro: ' + err.message;
         })
         .finally(() => {
             saveBtn.disabled = false;

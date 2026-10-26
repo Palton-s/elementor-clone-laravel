@@ -14,8 +14,8 @@ class TabsWidget extends BaseWidget
 
         $this->defaultSettings = [
             'tabs' => [
-                ['title' => 'Tab 1', 'content' => '<p>Content for tab 1</p>'],
-                ['title' => 'Tab 2', 'content' => '<p>Content for tab 2</p>'],
+                ['title' => 'Aba 1', 'content' => '<p>Conteúdo da aba 1</p>'],
+                ['title' => 'Aba 2', 'content' => '<p>Conteúdo da aba 2</p>'],
             ],
             'active_tab' => 0,
             'orientation' => 'horizontal',
@@ -58,7 +58,7 @@ class TabsWidget extends BaseWidget
         $padding = (int) $settings['content_padding'];
 
         if (empty($tabs)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No tabs configured</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhuma aba configurada</div>';
         }
 
         $isVertical = $orientation === 'vertical';
@@ -71,7 +71,7 @@ class TabsWidget extends BaseWidget
         $contentsHtml = '';
 
         foreach ($tabs as $i => $tab) {
-            $title = htmlspecialchars($tab['title'] ?? 'Tab ' . ($i + 1), ENT_QUOTES, 'UTF-8');
+            $title = htmlspecialchars($tab['title'] ?? 'Aba ' . ($i + 1), ENT_QUOTES, 'UTF-8');
             $tabHtmlContent = $tab['content'] ?? '';
             $isActive = $i === $activeTab;
 
@@ -122,14 +122,14 @@ class TabsWidget extends BaseWidget
         $padding = (int) $settings['content_padding'];
 
         if (empty($tabs)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No tabs</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhuma aba</div>';
         }
 
         $tabsHtml = '';
         $contentsHtml = '';
 
         foreach ($tabs as $i => $tab) {
-            $title = htmlspecialchars($tab['title'] ?? 'Tab ' . ($i + 1), ENT_QUOTES, 'UTF-8');
+            $title = htmlspecialchars($tab['title'] ?? 'Aba ' . ($i + 1), ENT_QUOTES, 'UTF-8');
             $tabContent = $tab['content'] ?? '';
             $isActive = $i === $activeTab;
 

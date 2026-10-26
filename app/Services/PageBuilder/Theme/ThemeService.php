@@ -179,7 +179,7 @@ HTML;
     {
         return match ($type) {
             'all' => true,
-            'home' => $pageSlug === null || $pageSlug === config('page-builder.home_slug', 'home'),
+            'home' => $pageSlug === null || $pageSlug === config('page-builder.theme_builder.home_slug', 'home'),
             'all_pages' => $pageSlug !== null,
             'singular' => $pageSlug !== null,
             'specific' => $value && $pageSlug === $value,
@@ -210,11 +210,11 @@ HTML;
     public static function conditionOptions(): array
     {
         return [
-            'all' => 'Entire Site',
-            'home' => 'Homepage',
-            'all_pages' => 'All Pages',
-            'singular' => 'All Singular',
-            'specific' => 'Specific Page',
+            'all' => 'Site inteiro',
+            'home' => 'Página inicial',
+            'all_pages' => 'Todas as páginas',
+            'singular' => 'Todas as páginas individuais',
+            'specific' => 'Página específica',
         ];
     }
 }

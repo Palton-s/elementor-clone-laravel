@@ -6,6 +6,7 @@ use App\Models\Page;
 use App\Models\Element;
 use App\Services\PageBuilder\DynamicTags\DynamicTagService;
 use App\Services\PageBuilder\Security\HtmlSanitizer;
+use App\Services\PageBuilder\Widgets\ColumnWidget;
 
 class Renderer
 {
@@ -115,14 +116,112 @@ HTML;
             $childrenHtml = $this->renderElements($element->children, $options);
         }
 
-        $mergedSettings = array_merge($element->settings ?? [], $element->styles ?? []);
-        $innerHtml = $widget->render(
-            $mergedSettings,
-            array_merge($element->content ?? [], ['children' => $childrenHtml]),
-            $element->styles ?? []
+        // Children are rendered once; each device variant of this widget gets a placeholder instead
+        $placeholder = '<!--pb-children-' . $element->id . '-->';
+        $render = fn (array $settings, array $styles) => $widget->render(
+            array_merge($settings, $styles),
+            array_merge($element->content ?? [], ['children' => $placeholder]),
+            $styles
         );
 
-        return $this->buildElementHtml($element, $innerHtml, $options, false);
+        [$innerHtml, $responsiveCss] = $this->renderResponsiveVariants($element, $widget->isContainer(), $render);
+        $innerHtml = str_replace($placeholder, $childrenHtml, $innerHtml);
+
+        return $this->buildElementHtml($element, $innerHtml, $options, false, $responsiveCss);
+    }
+
+    /**
+     * Renders the desktop version plus tablet/mobile overrides as media-query CSS.
+     *
+     * @return array{0: string, 1: string} [html, css]
+     */
+    protected function renderResponsiveVariants(Element $element, bool $isContainer, callable $render): array
+    {
+        $base = $render($element->settings ?? [], $element->styles ?? []);
+        if (!$element->hasDeviceOverrides()) {
+            return [$base, ''];
+        }
+
+        $variants = [];
+        foreach (Element::RESPONSIVE_DEVICES as $device) {
+            [$settings, $styles] = $element->valuesForDevice($device);
+            $variants[$device] = $render($settings, $styles);
+        }
+        if (count(array_unique(array_merge([$base], array_values($variants)))) === 1) {
+            return [$base, ''];
+        }
+
+        $compiled = (new ResponsiveStyleCompiler())->compile($base, $variants, 'e' . $element->id);
+        if ($compiled !== null) {
+            return [$compiled['html'], $compiled['css']];
+        }
+
+        // Markup differs per device (e.g. a different layout option): ship each variant and show
+        // the right one. Containers keep desktop markup so their children are never duplicated.
+        if ($isContainer) {
+            return [$base, ''];
+        }
+
+        $id = $element->id;
+        $tablet = ResponsiveStyleCompiler::BREAKPOINTS['tablet'];
+        $mobile = ResponsiveStyleCompiler::BREAKPOINTS['mobile'];
+        $html = '<div class="pb-rv" data-pbrv="' . $id . '-desktop">' . $base . '</div>';
+        foreach ($variants as $device => $variant) {
+            $html .= '<div class="pb-rv" data-pbrv="' . $id . '-' . $device . '">' . $variant . '</div>';
+        }
+        $sel = fn (string $device) => '[data-pbrv="' . $id . '-' . $device . '"]';
+        $css = '.pb-rv{display:contents}' . $sel('tablet') . ',' . $sel('mobile') . '{display:none}'
+            . "@media (max-width: {$tablet}px){" . $sel('desktop') . '{display:none}' . $sel('tablet') . '{display:contents}}'
+            . "@media (max-width: {$mobile}px){" . $sel('tablet') . '{display:none}' . $sel('mobile') . '{display:contents}}';
+
+        return [$html, $css];
+    }
+
+    /**
+     * Inline style of the .pb-element wrapper for a given set of values.
+     */
+    protected function wrapperStyle(Element $element, array $settings, array $styles): string
+    {
+        $styleStr = $this->buildStyleString($styles);
+        if ($element->type === 'column') {
+            $columnWidget = $this->widgetManager->getWidget('column');
+            if ($columnWidget instanceof ColumnWidget) {
+                $styleStr .= $columnWidget->wrapperStyle(array_merge($settings, $styles));
+            }
+        }
+
+        return $styleStr;
+    }
+
+    /**
+     * Media-query rules for the wrapper's own inline style (margins, column width...).
+     */
+    protected function wrapperResponsiveCss(Element $element, string $baseStyle): string
+    {
+        if (!$element->hasDeviceOverrides()) {
+            return '';
+        }
+        $compiler = new ResponsiveStyleCompiler();
+        $base = $compiler->parseStyle($baseStyle);
+        $deviceStyles = [];
+        foreach (Element::RESPONSIVE_DEVICES as $device) {
+            [$settings, $styles] = $element->valuesForDevice($device);
+            $props = $compiler->parseStyle($this->wrapperStyle($element, $settings, $styles));
+            if ($props !== $base) {
+                $deviceStyles[$device] = $props;
+            }
+        }
+        if ($deviceStyles === []) {
+            return '';
+        }
+
+        $selector = '.pb-element[data-element-id="' . $element->id . '"]';
+        $rules = [];
+        foreach ($compiler->deviceRules($base, $deviceStyles, Element::RESPONSIVE_DEVICES) as $device => $props) {
+            $rules[$device][] = $selector . '{' . $compiler->declarations($props) . '}';
+        }
+
+        return $compiler->wrapMedia($rules);
     }
 
     public function renderEditor(Page $page): string
@@ -250,6 +349,10 @@ HTML;
 
         $css = '';
         foreach ($styles as $property => $value) {
+            // Compound values (gradients, typography groups) are consumed by the widgets themselves
+            if (!is_scalar($value) || $value === '') {
+                continue;
+            }
             $cssProperty = preg_replace('/([a-z0-9])([A-Z])/', '$1-$2', $property);
             $cssProperty = str_replace('_', '-', $cssProperty);
             $cssProperty = strtolower($cssProperty);
@@ -300,7 +403,12 @@ HTML;
                 }
 
                 if ($videoId) {
-                    $iframe = str_replace($url, "https://www.youtube.com/embed/{$videoId}", $matches[0]);
+                    // Keep the player options (autoplay, start, mute, controls...) set by the video widget;
+                    // a watch?v= URL carries the id in its query, so only the other parameters are kept
+                    parse_str(html_entity_decode((string) parse_url($url, PHP_URL_QUERY)), $query);
+                    unset($query['v']);
+                    $embed = "https://www.youtube.com/embed/{$videoId}" . ($query ? '?' . htmlspecialchars(http_build_query($query), ENT_QUOTES, 'UTF-8') : '');
+                    $iframe = str_replace($url, $embed, $matches[0]);
                     if (!str_contains($iframe, 'allow="')) {
                         $iframe = str_replace('<iframe', '<iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen', $iframe);
                     }
@@ -333,6 +441,7 @@ HTML;
         $css = "\n<style>\n.pb-drop-cap:first-letter { font-size: 3em; float: left; line-height: 1; margin-right: 10px; }\n";
 
         $css .= ".pb-section-inner > .pb-element { flex: 0 0 100%; max-width: 100%; }\n";
+        $css .= "@media (max-width: 767px) { :where(.pb-section-inner, .pb-inner-section) > :where(.pb-element[data-element-type=\"column\"]) { flex: 0 0 100% !important; max-width: 100% !important; } }\n";
         $css .= ".col-12 { flex: 0 0 100%; max-width: 100%; }\n";
         $css .= ".col-6 { flex: 0 0 50%; max-width: 50%; }\n";
         $css .= ".col-4 { flex: 0 0 33.333%; max-width: 33.333%; }\n";
@@ -404,7 +513,7 @@ HTML;
         return $scripts;
     }
 
-    public function renderSingleElement(Element $element): string
+    public function renderSingleElement(Element $element, string $device = 'desktop'): string
     {
         $widget = $this->widgetManager->getWidget($element->type);
 
@@ -415,21 +524,21 @@ HTML;
         $childrenHtml = '';
         if ($element->children->isNotEmpty()) {
             foreach ($element->children as $child) {
-                $childrenHtml .= $this->renderSingleElement($child);
+                $childrenHtml .= $this->renderSingleElement($child, $device);
             }
         }
 
-        $mergedSettings = array_merge($element->settings ?? [], $element->styles ?? []);
+        [$settings, $styles] = $element->valuesForDevice($device);
         $innerHtml = $widget->render(
-            $mergedSettings,
+            array_merge($settings, $styles),
             array_merge($element->content ?? [], ['children' => $childrenHtml]),
-            $element->styles ?? []
+            $styles
         );
 
         return $this->buildElementHtml($element, $innerHtml, [], true);
     }
 
-    private function buildElementHtml(Element $element, string $innerHtml, array $options = [], bool $isSingle = false): string
+    private function buildElementHtml(Element $element, string $innerHtml, array $options = [], bool $isSingle = false, string $responsiveCss = ''): string
     {
         $innerHtml = $this->dynamicTagService->processTags($innerHtml, [
             'page' => $element->page ?? null,
@@ -439,7 +548,8 @@ HTML;
         $innerHtml = $this->processEmbeds($innerHtml);
 
         $attributes = $this->buildAttributes($element);
-        $styleStr = $this->buildStyleString($element->styles ?? []);
+        $styleStr = $this->wrapperStyle($element, $element->settings ?? [], $element->styles ?? []);
+        $responsiveCss .= $isSingle ? '' : $this->wrapperResponsiveCss($element, $styleStr);
         $styleAttr = $styleStr ? " style=\"{$styleStr}\"" : '';
         $cssId = $element->css_id ? " id=\"{$element->css_id}\"" : '';
         $cssClasses = "pb-element pb-{$element->type} {$element->column_size} {$this->getCssClasses($element)}";
@@ -474,6 +584,9 @@ HTML;
         }
 
         $visStyle = $visCss ? "<style>{$visCss}</style>" : '';
+        if ($responsiveCss !== '') {
+            $visStyle .= '<style data-pb-responsive="' . $element->id . '">' . $responsiveCss . '</style>';
+        }
 
         if ($isSingle) {
             return $visStyle . $customStyle . <<<HTML
@@ -538,7 +651,7 @@ HTML;
             'categories' => $widget->getCategories(),
             'is_container' => $widget->isContainer(),
             'default_settings' => $widget->getDefaultSettings(),
-            'controls' => $widget->getControls(),
+            'controls' => ControlTranslator::controls($widget->getControls()),
         ];
     }
 

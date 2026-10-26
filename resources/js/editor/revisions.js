@@ -11,7 +11,7 @@ export function showRevisionHistory() {
     state._prevSelected = state.selectedId;
     if (state.selectedId) { deselectAll(); state.selectedId = null; }
 
-    document.getElementById('settings-title').textContent = 'Historico de Revisoes';
+    document.getElementById('settings-title').textContent = 'Histórico de revisões';
     document.getElementById('settings-type').textContent = 'revisions';
     document.getElementById('editor-tabs').style.display = 'none';
     document.getElementById('responsive-tabs').style.display = 'none';
@@ -25,7 +25,7 @@ export function showRevisionHistory() {
             const revisions = data.revisions?.data || data.revisions || [];
             body.innerHTML = '';
             if (revisions.length === 0) {
-                body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--pb-text2)">Nenhuma revisao encontrada</div>';
+                body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--pb-text2)">Nenhuma revisão encontrada</div>';
                 return;
             }
             revisions.forEach(rev => {
@@ -51,8 +51,8 @@ export function showRevisionHistory() {
                         method: 'POST',
                         headers: { 'X-CSRF-TOKEN': state.csrf },
                     })
-                    .then(() => { toastSuccess('Revisao restaurada! Recarregando...'); setTimeout(() => location.reload(), 800); })
-                    .catch(() => toastError('Falha ao restaurar revisao'));
+                    .then(() => { toastSuccess('Revisão restaurada! Recarregando...'); setTimeout(() => location.reload(), 800); })
+                    .catch(() => toastError('Falha ao restaurar revisão'));
                 };
                 card.querySelector('.pb-rev-diff').onclick = () => {
                     showRevisionDiff(rev.id);
@@ -60,7 +60,7 @@ export function showRevisionHistory() {
                 body.appendChild(card);
             });
         })
-        .catch(() => { body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--pb-danger)">Erro ao carregar revisoes</div>'; });
+        .catch(() => { body.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--pb-danger)">Erro ao carregar revisões</div>'; });
 }
 
 function deselectAll() {

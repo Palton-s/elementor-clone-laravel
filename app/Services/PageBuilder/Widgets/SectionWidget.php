@@ -311,7 +311,7 @@ HTML;
 <div class="pb-section-editor" style="{$sectionStyle}">
     {$overlayHtml}
     {$shapeTopHtml}
-    <div class="pb-section-header">Section</div>
+    <div class="pb-section-header">Seção</div>
     <div class="pb-section-content" style="{$innerStyle}">
         {$children}
     </div>

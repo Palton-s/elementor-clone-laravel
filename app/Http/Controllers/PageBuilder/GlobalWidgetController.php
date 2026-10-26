@@ -44,7 +44,7 @@ class GlobalWidgetController extends Controller
         $globalWidget = $this->globalWidgetService->create($validated);
 
         return response()->json([
-            'message' => 'Global widget created successfully',
+            'message' => 'Widget global criado',
             'global_widget' => $globalWidget,
         ], 201);
     }
@@ -75,7 +75,7 @@ class GlobalWidgetController extends Controller
         $globalWidget = $this->globalWidgetService->update($globalWidget, $validated);
 
         return response()->json([
-            'message' => 'Global widget updated successfully',
+            'message' => 'Widget global atualizado',
             'global_widget' => $globalWidget,
         ]);
     }
@@ -86,7 +86,7 @@ class GlobalWidgetController extends Controller
         $this->globalWidgetService->delete($globalWidget);
 
         return response()->json([
-            'message' => 'Global widget deleted successfully',
+            'message' => 'Widget global excluído',
         ]);
     }
 

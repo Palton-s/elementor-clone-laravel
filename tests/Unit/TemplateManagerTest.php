@@ -64,7 +64,7 @@ class TemplateManagerTest extends TestCase
         $blank = $this->manager->get('blank');
 
         $this->assertIsArray($blank);
-        $this->assertEquals('Blank Page', $blank['name']);
+        $this->assertEquals('Página em branco', $blank['name']);
         $this->assertArrayHasKey('settings', $blank);
         $this->assertArrayHasKey('elements', $blank);
         $this->assertEmpty($blank['elements']);

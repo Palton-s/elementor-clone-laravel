@@ -58,7 +58,7 @@ class CarouselWidget extends BaseWidget
         $borderRadius = htmlspecialchars($settings['border_radius'], ENT_QUOTES, 'UTF-8');
 
         if (empty($images)) {
-            return '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">No images selected</div>';
+            return '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">Nenhuma imagem selecionada</div>';
         }
 
         $scrollSnap = $columns === 1 ? 'mandatory' : 'proximity';
@@ -146,7 +146,7 @@ class CarouselWidget extends BaseWidget
         $borderRadius = htmlspecialchars($settings['border_radius'], ENT_QUOTES, 'UTF-8');
 
         if (empty($images)) {
-            return '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🎠 Click to add images</div>';
+            return '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🎠 Clique para adicionar imagens</div>';
         }
 
         $html = '<div style="position:relative;border-radius:' . $borderRadius . ';overflow:hidden;">';

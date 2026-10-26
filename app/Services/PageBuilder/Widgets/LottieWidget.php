@@ -120,7 +120,7 @@ class LottieWidget extends BaseWidget
         $alignVal = $alignMap[$alignment] ?? 'center';
 
         if (!$url) {
-            return '<div class="pb-lottie-editor" style="display: flex; justify-content: ' . $alignVal . '; padding: 20px; border: 2px dashed #d1d5db; border-radius: 8px; background: #f9fafb;"><div style="text-align: center; color: #9ca3af;"><div style="font-size: 2rem; margin-bottom: 8px;">🎬</div><div style="font-size: 0.85rem;">Lottie Animation<br><span style="font-size: 0.75rem;">Configure a URL do arquivo .json</span></div></div></div>';
+            return '<div class="pb-lottie-editor" style="display: flex; justify-content: ' . $alignVal . '; padding: 20px; border: 2px dashed #d1d5db; border-radius: 8px; background: #f9fafb;"><div style="text-align: center; color: #9ca3af;"><div style="font-size: 2rem; margin-bottom: 8px;">🎬</div><div style="font-size: 0.85rem;">Animação Lottie<br><span style="font-size: 0.75rem;">Configure a URL do arquivo .json</span></div></div></div>';
         }
 
         $playerStyle = "width: {$width}px; height: {$height}px;";

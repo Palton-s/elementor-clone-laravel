@@ -72,7 +72,7 @@ class SocialIconsWidget extends BaseWidget
         $alignment = $settings['alignment'];
 
         if (empty($icons)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No icons configured</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhum ícone configurado</div>';
         }
 
         $html = '<div class="pb-social-icons" style="display: grid; grid-template-columns: repeat(' . $columns . ', 1fr); gap: ' . $gap . 'px; text-align: ' . $alignment . ';">';
@@ -102,7 +102,7 @@ class SocialIconsWidget extends BaseWidget
         $alignment = $settings['alignment'];
 
         if (empty($icons)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No icons</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhum ícone</div>';
         }
 
         $html = '<div style="display: grid; grid-template-columns: repeat(' . $columns . ', 1fr); gap: ' . $gap . 'px; text-align: ' . $alignment . '; padding: 8px 0;">';

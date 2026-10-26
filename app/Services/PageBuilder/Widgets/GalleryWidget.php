@@ -55,7 +55,7 @@ class GalleryWidget extends BaseWidget
         $imageSize = $settings['image_size'];
 
         if (empty($images)) {
-            return '<div class="pb-gallery-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">No images selected</div>';
+            return '<div class="pb-gallery-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;">Nenhuma imagem selecionada</div>';
         }
 
         if ($layout === 'masonry') {
@@ -92,7 +92,7 @@ class GalleryWidget extends BaseWidget
         $borderRadius = (int) $settings['border_radius'];
 
         if (empty($images)) {
-            return '<div class="pb-gallery-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🖼️ Click to add images</div>';
+            return '<div class="pb-gallery-placeholder" style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px;cursor:pointer;">🖼️ Clique para adicionar imagens</div>';
         }
 
         $gridStyle = "display: grid; grid-template-columns: repeat({$columns}, 1fr); gap: {$gap}px;";

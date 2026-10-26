@@ -13,7 +13,7 @@
                     <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
                         <a href="{{ route("page-builder.projects.index") }}" class="pb-hero-btn-ghost" style="padding:.4rem .6rem">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                            Voltar ao Hub
+                            Voltar aos projetos
                         </a>
                         <span style="color:rgba(255,255,255,.6);font-size:.8rem">Projetos / {{ $project->name }}</span>
                     </div>
@@ -21,6 +21,12 @@
                     <p class="pb-hero-sub">{{ $project->description ?: "Gerencie páginas, temas e popups deste projeto" }}</p>
                 </div>
                 <div style="display:flex;gap:.6rem;align-items:center;position:relative;z-index:2">
+                    @if($project->pages_count > 0)
+                        <a href="{{ route("page-builder.projects.export-zip", $project) }}" class="pb-hero-btn-ghost" style="display:flex;align-items:center;gap:.4rem;text-decoration:none" title="Baixa o site inteiro (todas as páginas, imagens, vídeos e fontes) em um arquivo .zip" onclick="this.style.opacity='.6';this.querySelector('span').textContent='Gerando .zip...';setTimeout(()=>{this.style.opacity='';this.querySelector('span').textContent='Exportar site (.zip)'},8000)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                            <span>Exportar site (.zip)</span>
+                        </a>
+                    @endif
                     <div class="pb-card-dropdown">
                         <button class="pb-hero-btn-ghost" style="display:flex;align-items:center;gap:.4rem">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -81,7 +87,7 @@
                         <h3 class="pb-card-title">Temas</h3>
                         <span class="badge badge-published">{{ $project->theme_templates_count ?? $themes->count() }}</span>
                     </div>
-                    <span class="pb-card-slug">Header, Footer, Single, Archive</span>
+                    <span class="pb-card-slug">Cabeçalho, rodapé, artigo e listagem</span>
                 </div>
                 <div class="pb-card-footer">
                     <span class="pb-card-edit-btn">Gerenciar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>

@@ -80,8 +80,9 @@ class ElementManager
 
     public function delete(Element $element): bool
     {
-        if ($element->children()->exists()) {
-            $element->children()->delete();
+        // Depth first, so columns' contents go too, not only the direct children
+        foreach ($element->children()->get() as $child) {
+            $this->delete($child);
         }
 
         return (bool) $element->delete();
@@ -91,7 +92,7 @@ class ElementManager
     {
         $newElement = $element->replicate();
         $newElement->uuid = (string) \Illuminate\Support\Str::uuid();
-        $newElement->name = $element->name . ' (copy)';
+        $newElement->name = $element->name . ' (cópia)';
         $newElement->order = $this->getNextOrder($element->page, $element->parent_id);
         $newElement->save();
 

@@ -11,5 +11,11 @@ export default defineConfig({
     test: {
         environment: 'jsdom',
         include: ['resources/js/tests/**/*.test.js'],
+        coverage: {
+            provider: 'v8',
+            include: ['resources/js/editor/**/*.js'],
+            reporter: ['text-summary', 'text', 'html'],
+            reportsDirectory: 'coverage/js',
+        },
     },
 });

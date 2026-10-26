@@ -72,7 +72,10 @@ class DynamicTagService
         $replacements = $this->getReplacements($context);
         $content = preg_replace_callback('/\{\{\s*([a-zA-Z_.]+)\s*\}\}/', function ($matches) use ($replacements) {
             $tag = trim($matches[1]);
-            return $replacements[$tag] ?? $matches[0];
+            // Tags are expanded inside rendered HTML: values (page title, user name...) are text
+            return isset($replacements[$tag])
+                ? htmlspecialchars((string) $replacements[$tag], ENT_QUOTES | ENT_HTML5, 'UTF-8', false)
+                : $matches[0];
         }, $content);
         return $content;
     }

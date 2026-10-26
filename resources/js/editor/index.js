@@ -2,7 +2,7 @@ import state from './state.js';
 import { escHtml, showToast, toastError, toastSuccess, apiFetch } from './utils.js';
 import { renderCanvas, renderMath } from './canvas.js';
 import { pushHistory, undo, redo, updateUndoButtons } from './history.js';
-import { refreshSortables, bindDragDrop, _saveElementOrder } from './dragdrop.js';
+import { refreshSortables, bindDragDrop, _saveElementOrder, setInsertTarget } from './dragdrop.js';
 import { openHtmlImportModal } from './html-import.js';
 import { toggleNavigator, renderNavigator as renderNav, _showCanvasContext, _showNavContext, _hideNavContext, _hideCanvasContext, _navMoveElement, _navMoveRelative, _navPasteAfter, _startNavRename } from './navigator.js';
 import { loadControls, switchEditorTab } from './controls.js';
@@ -15,18 +15,21 @@ import { refreshMultiSelect, removeMultiToolbar, duplicateSelected, deleteSelect
 import { showSiteSettings, hideSiteSettings, loadGlobalSettings } from './global-settings.js';
 import { showPageSettings, hidePageSettings } from './page-settings.js';
 import { save, publish, autoSave, copyStyles, pasteStyles, saveAsTemplate, copyHtml, saveAsGlobalWidget, insertGlobalWidget, syncGlobalWidgets, _insertGlobalWidget } from './actions.js';
+import { hydrateIcons } from './icons.js';
 import { bindKeyboard, bindZoom, toggleFullscreen, switchTab, bindInlineEditing, bindWidgetSearch, bindResizablePanels, observeCanvas, setZoom, setResponsive, setResponsiveTab } from './ui.js';
 
 const editor = {
     init(pageId, csrfToken) {
         state.pageId = pageId;
         state.csrf = csrfToken;
+        hydrateIcons();
 
         state.renderCanvas = (els) => { renderCanvas(state, els); refreshSortables(state); };
         state.renderMath = () => renderMath();
         state.renderStructure = (els) => renderStructureWithSelect(els);
         state.renderNavigator = (s) => renderNav(s || state);
-        state.onSelectElement = (id) => selectElement(id);
+        // ctrlKey (Ctrl/Cmd+click on the canvas) toggles multi-selection
+        state.onSelectElement = (id, ctrlKey) => selectElement(id, ctrlKey);
         state.loadControls = (id) => loadControls(id);
         state.showToast = (msg, type) => showToast(msg, type);
         state.toastError = (msg) => toastError(msg);
@@ -35,6 +38,7 @@ const editor = {
         state.deleteElement = (id) => deleteElement(id);
         state.showCanvasContext = (x, y, elId) => _showCanvasContext(state, x, y, elId);
         state._saveElementOrder = () => _saveElementOrder(state);
+        state.setInsertTarget = (parentId) => setInsertTarget(state, parentId);
 
         loadElements();
         loadPageData();
@@ -73,7 +77,17 @@ const editor = {
     showPageSettings() { showPageSettings(); },
     hidePageSettings() { hidePageSettings(); },
     openFindReplace() { openFindReplace(); },
-    exportPage() { window.open('/page-builder/pages/' + state.pageId + '/export', '_blank'); },
+    exportPage() {
+        // Elements are persisted on every change, so the zip already matches the canvas.
+        // A download link avoids unloading the editor (which would end the collaboration session).
+        showToast('Gerando .zip da página...', 'info');
+        const a = document.createElement('a');
+        a.href = '/page-builder/pages/' + state.pageId + '/export-zip';
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    },
     saveAsTemplate() { saveAsTemplate(); },
     copyHtml() { copyHtml(); },
     importHtml() { openHtmlImportModal(state.csrf); },

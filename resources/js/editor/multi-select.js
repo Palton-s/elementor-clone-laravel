@@ -1,5 +1,6 @@
 import state from './state.js';
 import { apiFetch, toastError } from './utils.js';
+import { icon } from './icons.js';
 
 export function refreshMultiSelect() {
     document.querySelectorAll('.pb-el').forEach(el => {
@@ -25,9 +26,9 @@ export function showMultiToolbar() {
     bar.id = 'pb-multi-toolbar';
     bar.innerHTML = `
         <span class="pb-multi-count">${count} selecionados</span>
-        <button class="pb-multi-btn" onclick="window.pageBuilderEditor.duplicateSelected()">&#128203; Duplicar</button>
-        <button class="pb-multi-btn danger" onclick="window.pageBuilderEditor.deleteSelected()">&#128465; Excluir</button>
-        <button class="pb-multi-btn" onclick="window.pageBuilderEditor.clearMultiSelect()">&#10005; Limpar</button>
+        <button class="pb-multi-btn" onclick="window.pageBuilderEditor.duplicateSelected()">${icon('copy', 14)} Duplicar</button>
+        <button class="pb-multi-btn danger" onclick="window.pageBuilderEditor.deleteSelected()">${icon('trash', 14)} Excluir</button>
+        <button class="pb-multi-btn" onclick="window.pageBuilderEditor.clearMultiSelect()">${icon('x', 14)} Limpar</button>
     `;
     document.body.appendChild(bar);
 }

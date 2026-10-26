@@ -13,17 +13,17 @@ class FormWidget extends BaseWidget
         $this->keywords = ['form', 'contact', 'submit', 'input'];
 
         $this->defaultSettings = [
-            'form_name' => 'Contact Form',
+            'form_name' => 'Formulário de contato',
             'fields' => [
-                ['label' => 'Name', 'type' => 'text', 'required' => true, 'placeholder' => 'Your name'],
-                ['label' => 'Email', 'type' => 'email', 'required' => true, 'placeholder' => 'your@email.com'],
-                ['label' => 'Message', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Your message'],
+                ['label' => 'Nome', 'type' => 'text', 'required' => true, 'placeholder' => 'Seu nome'],
+                ['label' => 'E-mail', 'type' => 'email', 'required' => true, 'placeholder' => 'seu@email.com'],
+                ['label' => 'Mensagem', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Sua mensagem'],
             ],
-            'button_text' => 'Send Message',
+            'button_text' => 'Enviar mensagem',
             'button_color' => '#6366f1',
             'button_text_color' => '#ffffff',
             'button_width' => 'auto',
-            'success_message' => 'Thank you! Your message has been sent.',
+            'success_message' => 'Obrigado! Sua mensagem foi enviada.',
             'field_spacing' => 12,
             'field_radius' => 6,
         ];
@@ -85,7 +85,7 @@ class FormWidget extends BaseWidget
             if ($type === 'textarea') {
                 $fieldsHtml .= "<textarea name=\"{$fieldName}\" placeholder=\"{$placeholder}\"{$requiredAttr} style=\"{$fieldStyle} min-height: 100px; resize: vertical;\"></textarea>";
             } elseif ($type === 'select') {
-                $fieldsHtml .= "<select name=\"{$fieldName}\"{$requiredAttr} style=\"{$fieldStyle}\"><option value=\"\">Select...</option></select>";
+                $fieldsHtml .= "<select name=\"{$fieldName}\"{$requiredAttr} style=\"{$fieldStyle}\"><option value=\"\">Selecione...</option></select>";
             } elseif ($type === 'checkbox' || $type === 'radio') {
                 $fieldsHtml .= "<div style=\"display: flex; align-items: center; gap: 8px;\"><input type=\"{$type}\" name=\"{$fieldName}\"{$requiredAttr} style=\"width: auto;\"><span style=\"font-size: 14px; color: #374151;\">{$label}</span></div>";
             } else {
@@ -178,9 +178,9 @@ class FormWidget extends BaseWidget
             $fieldsHtml .= "<label style=\"display: block; margin-bottom: 4px; font-size: 14px; font-weight: 500; color: #374151;\">{$label}{$requiredStar}</label>";
 
             if ($type === 'textarea') {
-                $fieldsHtml .= "<div style=\"width:100%;min-height:60px;padding:8px 10px;border:1px solid #d1d5db;border-radius:{$radius}px;background:#f9fafb;font-size:13px;color:#9ca3af\">Text area</div>";
+                $fieldsHtml .= "<div style=\"width:100%;min-height:60px;padding:8px 10px;border:1px solid #d1d5db;border-radius:{$radius}px;background:#f9fafb;font-size:13px;color:#9ca3af\">Texto longo</div>";
             } elseif ($type === 'select') {
-                $fieldsHtml .= "<div style=\"width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:{$radius}px;background:#fff;font-size:13px;color:#9ca3af;display:flex;justify-content:space-between;align-items:center\"><span>Select...</span><span>▼</span></div>";
+                $fieldsHtml .= "<div style=\"width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:{$radius}px;background:#fff;font-size:13px;color:#9ca3af;display:flex;justify-content:space-between;align-items:center\"><span>Selecione...</span><span>▼</span></div>";
             } elseif ($type === 'checkbox' || $type === 'radio') {
                 $fieldsHtml .= "<div style=\"display:flex;align-items:center;gap:8px\"><input type=\"{$type}\" disabled style=\"width:auto\"><span style=\"font-size:13px;color:#374151\">{$label}</span></div>";
             } else {

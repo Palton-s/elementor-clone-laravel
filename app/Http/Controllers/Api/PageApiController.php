@@ -51,7 +51,7 @@ class PageApiController extends Controller
         }
 
         return response()->json([
-            'message' => 'Page created',
+            'message' => 'Página criada',
             'page' => new PageResource($page),
         ], 201);
     }
@@ -88,7 +88,7 @@ class PageApiController extends Controller
         $page = $this->pageBuilder->updatePage($page, $validated);
 
         return response()->json([
-            'message' => 'Page updated',
+            'message' => 'Página atualizada',
             'page' => new PageResource($page),
         ]);
     }
@@ -99,7 +99,7 @@ class PageApiController extends Controller
         $page->delete();
 
         return response()->json([
-            'message' => 'Page deleted',
+            'message' => 'Página excluída',
         ]);
     }
 }

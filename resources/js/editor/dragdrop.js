@@ -1,21 +1,40 @@
 import Sortable from 'sortablejs';
 import { toastError, apiFetch } from './utils.js';
 
-let _widgetPanelSortable = null;
-let _canvasSortable = null;
 const _containerSortables = new Map();
+
+// Shared options for every canvas drop target (root + each container's children list)
+const CANVAS_SORTABLE_OPTIONS = {
+    animation: 150,
+    ghostClass: 'pb-sortable-ghost',
+    chosenClass: 'pb-sortable-chosen',
+    dragClass: 'pb-sortable-drag',
+    handle: '.pb-el-drag',
+    draggable: '.pb-el',
+    filter: '.pb-empty-drop, .pb-empty-canvas',
+    preventOnFilter: false,
+    fallbackOnBody: true,
+    swapThreshold: 0.65,
+    emptyInsertThreshold: 24,
+};
 
 export function bindDragDrop(state) {
     _bindWidgetPanel(state);
-    _bindCanvasDropzone(state);
 }
 
 function _bindWidgetPanel(state) {
     const panelBody = document.getElementById('panel-widgets');
     if (!panelBody) return;
 
-    const widgetItems = panelBody.querySelectorAll('.pb-widget-grid');
-    widgetItems.forEach(grid => {
+    // A plain click (no drag) inserts the widget; stopPropagation keeps the current selection as reference
+    panelBody.addEventListener('click', (e) => {
+        const item = e.target.closest('.pb-widget-item[data-type]');
+        if (!item) return;
+        e.stopPropagation();
+        _insertByClick(state, item.dataset.type);
+    });
+
+    panelBody.querySelectorAll('.pb-widget-grid').forEach(grid => {
         Sortable.create(grid, {
             group: {
                 name: 'widgets',
@@ -29,71 +48,48 @@ function _bindWidgetPanel(state) {
             dragClass: 'pb-widget-dragging',
             animation: 150,
             filter: '.pb-widget-group-title',
-            onStart(evt) {
+            onStart() {
                 document.body.classList.add('pb-is-dragging');
             },
-            onEnd(evt) {
+            onEnd() {
                 document.body.classList.remove('pb-is-dragging');
             },
         });
     });
 }
 
-function _bindCanvasDropzone(state) {
-    const dz = document.getElementById('canvas-dropzone');
-    if (!dz) return;
-
-    if (_canvasSortable) _canvasSortable.destroy();
-
-    _canvasSortable = Sortable.create(dz, {
-        group: {
-            name: 'widgets',
-            pull: false,
-            put: ['widgets'],
-        },
-        animation: 200,
-        ghostClass: 'pb-sortable-ghost',
-        chosenClass: 'pb-sortable-chosen',
-        dragClass: 'pb-sortable-drag',
-        handle: '.pb-el-drag',
-        draggable: '.pb-el',
-        emptyInsertThreshold: 60,
-        onAdd(evt) {
-            _handleNewWidgetDrop(state, evt);
-        },
-    });
+function _containerParentId(container) {
+    return container.dataset.parentId ? parseInt(container.dataset.parentId) : null;
 }
 
 function _handleNewWidgetDrop(state, evt) {
     const item = evt.item;
     const type = item.dataset.type;
+    const targetContainer = evt.to;
 
+    // Compute the insertion point before removing the cloned panel item
+    let insertBeforeId = null;
+    let sib = item.nextElementSibling;
+    while (sib) {
+        if (sib.classList.contains('pb-el') && sib.dataset.elId) { insertBeforeId = parseInt(sib.dataset.elId); break; }
+        sib = sib.nextElementSibling;
+    }
+
+    if (item.parentNode) item.parentNode.removeChild(item);
     if (!type) return;
 
-    if (item.parentNode) {
-        item.parentNode.removeChild(item);
-    }
+    clearInsertTarget(state);
+    createElementAt(state, type, _containerParentId(targetContainer), insertBeforeId);
+}
 
-    let parentId = null;
-    let insertBeforeId = null;
-
-    const targetContainer = evt.to;
-    const parentEl = targetContainer.closest('.pb-el[data-is-container="true"]');
-    if (parentEl) {
-        parentId = parseInt(parentEl.dataset.elId);
-    }
-
-    const siblings = Array.from(targetContainer.children).filter(
-        el => el.classList.contains('pb-el') && el.dataset.elId
-    );
-    const newIndex = evt.newIndex;
-    if (newIndex < siblings.length) {
-        insertBeforeId = parseInt(siblings[newIndex].dataset.elId);
-    }
-
+/**
+ * Creates a widget inside parentId (null = page root), before insertBeforeId when given,
+ * reloads the canvas and selects the new element.
+ */
+export function createElementAt(state, type, parentId, insertBeforeId) {
     state.showToast('Adicionando ' + type + '...', 'info');
 
-    apiFetch(`/page-builder/pages/${state.pageId}/elements`, {
+    return apiFetch(`/page-builder/pages/${state.pageId}/elements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf },
         body: JSON.stringify({
@@ -102,75 +98,137 @@ function _handleNewWidgetDrop(state, evt) {
             insert_before_id: insertBeforeId,
         }),
     })
-    .then(() => state.loadElements())
+    .then(res => Promise.resolve(state.loadElements()).then(() => {
+        if (res && res.element && res.element.id) state.onSelectElement(res.element.id);
+    }))
     .catch(err => toastError('Falha ao adicionar elemento: ' + (err.message || err)));
 }
 
-function _handleCanvasReorder(state, evt) {
-    const el = evt.item;
-    const elId = parseInt(el.dataset.elId);
-    if (!elId) return;
+// ---- Click-to-insert: the "+" inside containers picks a target, a click in the Inserir panel fills it
 
+let _escHandler = null;
+
+export function setInsertTarget(state, parentId) {
+    if (state.insertTarget && state.insertTarget.parentId === parentId) {
+        clearInsertTarget(state);
+        return;
+    }
+    state.insertTarget = { parentId };
+    markInsertTarget(state);
+
+    const tab = document.querySelector('.pb-panel-tab[data-tab="widgets"]');
+    if (tab && !tab.classList.contains('active')) tab.click();
+    state.showToast('Agora clique em um widget na aba Inserir (Esc cancela)', 'info');
+
+    if (!_escHandler) {
+        _escHandler = (e) => { if (e.key === 'Escape') clearInsertTarget(state); };
+        document.addEventListener('keydown', _escHandler);
+    }
+}
+
+export function clearInsertTarget(state) {
+    state.insertTarget = null;
+    markInsertTarget(state);
+    if (_escHandler) {
+        document.removeEventListener('keydown', _escHandler);
+        _escHandler = null;
+    }
+}
+
+// Re-applied after every canvas render, since rendering rebuilds the DOM
+export function markInsertTarget(state) {
+    document.querySelectorAll('.pb-insert-target, .pb-insert-parent').forEach(el => el.classList.remove('pb-insert-target', 'pb-insert-parent'));
+    document.body.classList.toggle('pb-has-insert-target', !!state.insertTarget);
+    if (!state.insertTarget) return;
+    const id = state.insertTarget.parentId;
+    const adder = document.querySelector(`#canvas-dropzone .pb-empty-drop[data-parent-id="${id}"]`);
+    if (!adder) { state.insertTarget = null; document.body.classList.remove('pb-has-insert-target'); return; }
+    adder.classList.add('pb-insert-target');
+    adder.closest('.pb-el')?.classList.add('pb-insert-parent');
+}
+
+function _locate(list, id, parent = null) {
+    for (let i = 0; i < (list || []).length; i++) {
+        if (list[i].id === id) return { el: list[i], list, index: i, parent };
+        const found = _locate(list[i].children, id, list[i]);
+        if (found) return found;
+    }
+    return null;
+}
+
+function _insertByClick(state, type) {
+    let parentId = null;
+    let beforeId = null;
+
+    if (state.insertTarget) {
+        parentId = state.insertTarget.parentId;
+    } else if (state.selectedId) {
+        // No "+" chosen: go inside the selected container, or right after the selected element
+        const found = _locate(state._lastElements, state.selectedId);
+        if (found && found.el.is_container) {
+            parentId = found.el.id;
+        } else if (found) {
+            const next = found.list[found.index + 1];
+            parentId = found.parent ? found.parent.id : null;
+            if (next) beforeId = next.id;
+        }
+    }
+
+    clearInsertTarget(state);
+    createElementAt(state, type, parentId, beforeId);
+}
+
+function _handleCanvasMove(state) {
     const order = _buildOrderFromDOM();
     apiFetch(`/page-builder/pages/${state.pageId}/elements/reorder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf },
         body: JSON.stringify({ order }),
-    }).then(() => {
-        setTimeout(() => state.loadElements(), 50);
-    }).catch(err => {
-        toastError('Falha ao reordenar');
-        setTimeout(() => state.loadElements(), 50);
-    });
+    })
+    .catch(() => toastError('Falha ao reordenar'))
+    .finally(() => state.loadElements());
 }
 
 export function initContainerSortables(state) {
     destroyAllContainerSortables();
 
-    if (_canvasSortable) {
-        _canvasSortable.destroy();
-        _canvasSortable = null;
-    }
-
     const dz = document.getElementById('canvas-dropzone');
-    if (dz) {
-        _initSortableForContainer(dz, state, null);
-    }
+    if (dz) _initSortableForContainer(dz, state);
 
-    document.querySelectorAll('.pb-el[data-is-container="true"] .pb-el-children').forEach(childContainer => {
-        const parentEl = childContainer.closest('.pb-el[data-is-container="true"]');
-        if (parentEl) {
-            const parentId = parseInt(parentEl.dataset.elId);
-            _initSortableForContainer(childContainer, state, parentId);
-        }
+    document.querySelectorAll('#canvas-dropzone .pb-el-children').forEach(childContainer => {
+        _initSortableForContainer(childContainer, state);
     });
+
+    markInsertTarget(state);
 }
 
-function _initSortableForContainer(container, state, parentId) {
+function _initSortableForContainer(container, state) {
     if (_containerSortables.has(container)) {
         _containerSortables.get(container).destroy();
     }
 
-    const containerId = 'sb-' + Math.random().toString(36).slice(2, 8);
-
     const sortable = Sortable.create(container, {
+        ...CANVAS_SORTABLE_OPTIONS,
         group: {
-            name: containerId,
-            pull: false,
-            put: ['widgets'],
+            name: 'canvas',
+            pull: true,
+            put: ['widgets', 'canvas'],
         },
-        animation: 200,
-        ghostClass: 'pb-sortable-ghost',
-        chosenClass: 'pb-sortable-chosen',
-        dragClass: 'pb-sortable-drag',
-        handle: '.pb-el-drag',
-        draggable: '.pb-el',
-        emptyInsertThreshold: 40,
+        onStart() {
+            document.body.classList.add('pb-is-dragging');
+        },
+        onEnd() {
+            document.body.classList.remove('pb-is-dragging');
+        },
         onAdd(evt) {
-            _handleNewWidgetDrop(state, evt);
+            if (evt.item.dataset.type && !evt.item.dataset.elId) {
+                _handleNewWidgetDrop(state, evt);
+            } else {
+                _handleCanvasMove(state);
+            }
         },
-        onUpdate(evt) {
-            _handleCanvasReorder(state, evt);
+        onUpdate() {
+            _handleCanvasMove(state);
         },
     });
 
@@ -188,13 +246,13 @@ export function refreshSortables(state) {
 
 export function _saveElementOrder(state) {
     const buildOrder = (elements) => {
-        return elements.map(el => ({
+        return elements.filter(el => el.id).map(el => ({
             id: el.id,
             children: el.children ? buildOrder(el.children) : [],
         }));
     };
     const order = buildOrder(state._lastElements || []);
-    apiFetch(`/page-builder/pages/${state.pageId}/elements/reorder`, {
+    return apiFetch(`/page-builder/pages/${state.pageId}/elements/reorder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf },
         body: JSON.stringify({ order }),
@@ -202,20 +260,17 @@ export function _saveElementOrder(state) {
 }
 
 function _buildOrderFromDOM() {
-    function buildContainer(el) {
-        const children = [];
-        el.querySelectorAll(':scope > .pb-el').forEach(child => {
+    function buildContainer(container) {
+        const items = [];
+        container.querySelectorAll(':scope > .pb-el').forEach(child => {
             const childId = parseInt(child.dataset.elId);
-            if (childId) {
-                const childItem = { id: childId, children: [] };
-                const childChildren = child.querySelector('.pb-el-children');
-                if (childChildren) {
-                    childItem.children = buildContainer(childChildren);
-                }
-                children.push(childItem);
-            }
+            if (!childId) return;
+            const childItem = { id: childId, children: [] };
+            const own = child.querySelector(`.pb-el-children[data-parent-id="${childId}"]`);
+            if (own) childItem.children = buildContainer(own);
+            items.push(childItem);
         });
-        return children;
+        return items;
     }
     const dz = document.getElementById('canvas-dropzone');
     return dz ? buildContainer(dz) : [];

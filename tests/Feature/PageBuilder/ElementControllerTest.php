@@ -123,7 +123,7 @@ class ElementControllerTest extends TestCase
             ->delete(route('page-builder.elements.destroy', $element));
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Element deleted successfully');
+        $response->assertJsonPath('message', 'Elemento excluído');
         $this->assertSoftDeleted($element);
     }
 
@@ -152,7 +152,7 @@ class ElementControllerTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Elements reordered successfully');
+        $response->assertJsonPath('message', 'Ordem dos elementos atualizada');
     }
 
     public function test_move_element(): void
@@ -179,7 +179,7 @@ class ElementControllerTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Element settings updated successfully');
+        $response->assertJsonPath('message', 'Configurações do elemento atualizadas');
     }
 
     public function test_update_styles(): void

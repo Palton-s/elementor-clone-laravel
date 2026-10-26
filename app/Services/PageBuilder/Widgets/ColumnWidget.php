@@ -64,17 +64,27 @@ class ColumnWidget extends BaseWidget
         $colClassMap = ['col-1' => 8.33, 'col-2' => 16.67, 'col-3' => 25, 'col-4' => 33.33, 'col-5' => 41.67, 'col-6' => 50, 'col-7' => 58.33, 'col-8' => 66.67, 'col-9' => 75, 'col-10' => 83.33, 'col-11' => 91.67, 'col-12' => 100];
 
         if (is_numeric($columnWidth)) {
-            return max(1, min(100, (int) $columnWidth));
+            return max(1, min(100, (float) $columnWidth));
         }
 
         return $colClassMap[$columnWidth] ?? 33;
+    }
+
+    /**
+     * Flex sizing for the element wrapper that holds this column inside a section row.
+     */
+    public function wrapperStyle(array $settings): string
+    {
+        $settings = $this->prepareSettings($settings);
+        $pct = $this->resolveWidth($settings['column_width']);
+
+        return "flex: 0 1 {$pct}%; max-width: {$pct}%; min-width: 0; box-sizing: border-box;";
     }
 
     public function render(array $settings, array $content = [], array $styles = []): string
     {
         $settings = $this->prepareSettings($settings);
         $children = $content['children'] ?? '';
-        $columnWidth = $settings['column_width'];
         $verticalAlign = $settings['vertical_alignment'];
         $contentPosition = $settings['content_position'];
         $bgColor = $settings['background_color'];
@@ -109,8 +119,8 @@ class ColumnWidget extends BaseWidget
             $style .= " box-shadow: {$boxShadow};";
         }
 
-        $pct = $this->resolveWidth($columnWidth);
-        $style .= " width: {$pct}%; flex: 0 0 {$pct}%; max-width: {$pct}%;";
+        // The width is applied to the .pb-element wrapper (see wrapperStyle), which is the flex item
+        $style .= " width: 100%; height: 100%; box-sizing: border-box;";
 
         $classes = 'pb-column';
 
@@ -186,7 +196,7 @@ HTML;
 
         return <<<HTML
 <div class="{$classes}" style="{$style}">
-    <div class="pb-column-header">Column</div>
+    <div class="pb-column-header">Coluna</div>
     <div class="pb-column-content">
         {$children}
     </div>

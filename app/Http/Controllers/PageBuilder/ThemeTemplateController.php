@@ -122,11 +122,11 @@ class ThemeTemplateController extends Controller
 
             if ($redirectTo === 'editor') {
                 return redirect()->route('page-builder.themes.editor', $template)
-                    ->with('success', "Theme template \"{$template->title}\" created!");
+                    ->with('success', "Modelo do tema \"{$template->title}\" criado!");
             }
 
             return redirect()->route('page-builder.themes.index')
-                ->with('success', "Theme template \"{$template->title}\" created!");
+                ->with('success', "Modelo do tema \"{$template->title}\" criado!");
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -152,7 +152,7 @@ class ThemeTemplateController extends Controller
 
         $themeTemplate->update($validated);
 
-        if ($request->boolean('publish') || $validated['status'] === 'published') {
+        if ($request->boolean('publish') || ($validated['status'] ?? null) === 'published') {
             $themeTemplate->update([
                 'status' => 'published',
                 'published_at' => now(),
@@ -162,7 +162,7 @@ class ThemeTemplateController extends Controller
         $this->themeService->clearCache();
 
         return redirect()->route('page-builder.themes.index')
-            ->with('success', "Theme template \"{$themeTemplate->title}\" updated!");
+            ->with('success', "Modelo do tema \"{$themeTemplate->title}\" atualizado!");
     }
 
     public function destroy(ThemeTemplate $themeTemplate): RedirectResponse
@@ -174,7 +174,7 @@ class ThemeTemplateController extends Controller
         $this->themeService->clearCache();
 
         return redirect()->route('page-builder.themes.index')
-            ->with('success', "Theme template \"{$title}\" deleted!");
+            ->with('success', "Modelo do tema \"{$title}\" excluído!");
     }
 
     public function editor(ThemeTemplate $themeTemplate): View
@@ -182,7 +182,7 @@ class ThemeTemplateController extends Controller
         $this->authorizeOwner($themeTemplate);
         $page = $themeTemplate->page;
         if (!$page) {
-            abort(404, 'Associated page not found');
+            abort(404, 'Página associada não encontrada');
         }
 
         $themeContext = [
@@ -233,7 +233,7 @@ class ThemeTemplateController extends Controller
         $this->themeService->clearCache();
 
         return response()->json([
-            'message' => 'Conditions updated!',
+            'message' => 'Regras de exibição atualizadas!',
             'conditions' => $themeTemplate->fresh()->conditions,
         ]);
     }
@@ -249,7 +249,7 @@ class ThemeTemplateController extends Controller
         $this->themeService->clearCache();
 
         return response()->json([
-            'message' => 'Theme template published!',
+            'message' => 'Modelo do tema publicado!',
             'template' => $themeTemplate->fresh(),
         ]);
     }
@@ -265,7 +265,7 @@ class ThemeTemplateController extends Controller
         $this->themeService->clearCache();
 
         return response()->json([
-            'message' => 'Theme template unpublished!',
+            'message' => 'Modelo do tema despublicado!',
             'template' => $themeTemplate->fresh(),
         ]);
     }

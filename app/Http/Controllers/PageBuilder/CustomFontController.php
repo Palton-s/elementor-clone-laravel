@@ -83,7 +83,7 @@ class CustomFontController extends Controller
         $font = CustomFont::create($data);
 
         return response()->json([
-            'message' => 'Font uploaded successfully!',
+            'message' => 'Fonte enviada!',
             'font' => $font,
         ], 201);
     }
@@ -106,7 +106,7 @@ class CustomFontController extends Controller
         $customFont->update($validated);
 
         return response()->json([
-            'message' => 'Font updated successfully!',
+            'message' => 'Fonte atualizada!',
             'font' => $customFont->fresh(),
         ]);
     }
@@ -126,7 +126,7 @@ class CustomFontController extends Controller
         $customFont->delete();
 
         return response()->json([
-            'message' => 'Font deleted successfully!',
+            'message' => 'Fonte excluída!',
         ]);
     }
 

@@ -86,7 +86,7 @@ HTML;
 
         return <<<HTML
 <div class="pb-inner-section-editor" style="{$style}">
-    <div class="pb-inner-section-label" style="position:absolute;top:2px;left:4px;font-size:.55rem;color:var(--pb-text2);text-transform:uppercase;letter-spacing:.5px;">Inner Section</div>
+    <div class="pb-inner-section-label" style="position:absolute;top:2px;left:4px;font-size:.55rem;color:var(--pb-text2);text-transform:uppercase;letter-spacing:.5px;">Seção Interna</div>
     {$children}
 </div>
 HTML;

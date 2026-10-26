@@ -11,7 +11,7 @@
             <div class="pb-hero-orb pb-hero-orb-3"></div>
             <div class="pb-hero-content">
                 <div>
-                    <div class="pb-hero-badge">Page Builder</div>
+                    <div class="pb-hero-badge">Construtor de páginas</div>
                     <h1 class="pb-hero-title">Suas Páginas</h1>
                     <p class="pb-hero-sub">Gerencie, importe e publique suas páginas no construtor visual</p>
                 </div>

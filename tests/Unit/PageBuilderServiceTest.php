@@ -202,7 +202,7 @@ class PageBuilderServiceTest extends TestCase
 
         $this->assertNotEquals($element->id, $duplicate->id);
         $this->assertEquals($element->type, $duplicate->type);
-        $this->assertEquals($element->name . ' (copy)', $duplicate->name);
+        $this->assertEquals($element->name . ' (cópia)', $duplicate->name);
     }
 
     public function test_creates_revision_on_page_creation(): void

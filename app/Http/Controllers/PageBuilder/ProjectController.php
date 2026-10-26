@@ -7,10 +7,12 @@ use App\Models\Popup;
 use App\Models\Project;
 use App\Models\ThemeTemplate;
 use App\Models\Page;
+use App\Services\PageBuilder\Export\SiteExporter;
 use App\Services\PageBuilder\Project\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
@@ -44,6 +46,21 @@ class ProjectController extends Controller
         $popups = $project->popups()->latest()->limit(10)->get();
 
         return view('page-builder.projects.show', compact('project', 'pages', 'themes', 'popups'));
+    }
+
+    public function exportZip(Project $project, SiteExporter $exporter)
+    {
+        $this->authorize('view', $project);
+
+        try {
+            $zipPath = $exporter->exportProject($project);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $filename = (Str::slug($project->name) ?: 'site') . '.zip';
+
+        return response()->download($zipPath, $filename, ['Content-Type' => 'application/zip'])->deleteFileAfterSend(true);
     }
 
     public function store(Request $request): JsonResponse

@@ -1,3 +1,5 @@
+import { icon, widgetIcon } from './icons.js';
+
 export function escHtml(str) {
     const d = document.createElement('div');
     d.textContent = str;
@@ -8,11 +10,12 @@ export function apiFetch(url, options = {}) {
     const headers = Object.assign({ 'Accept': 'application/json' }, options.headers || {});
     return fetch(url, Object.assign({}, options, { headers, credentials: 'same-origin' })).then(r => {
         if (r.redirected) {
-            throw new Error('Sessao expirada. Recarregue a pagina.');
+            throw new Error('Sessão expirada. Recarregue a página.');
         }
         if (!r.ok) {
             return r.json().catch(() => r.text()).then(body => {
-                const msg = typeof body === 'string' ? `HTTP ${r.status}` : (body.message || (body.errors ? Object.values(body.errors).flat().join(', ') : `HTTP ${r.status}`));
+                // Validation errors come as "errors", controller errors as "message" or "error"
+                const msg = typeof body === 'string' ? `HTTP ${r.status}` : (body.message || body.error || (body.errors ? Object.values(body.errors).flat().join(', ') : `HTTP ${r.status}`));
                 throw new Error(msg);
             });
         }
@@ -27,7 +30,9 @@ export function showToast(msg, type) {
     t.className = 'pb-toast';
     if (type === 'error') t.style.borderColor = 'rgba(239,68,68,.4)';
     if (type === 'success') t.style.borderColor = 'rgba(34,197,94,.4)';
-    t.textContent = msg;
+    const prefix = type === 'error' ? icon('alert', 15) : type === 'success' ? icon('check', 15) : '';
+    t.innerHTML = prefix;
+    t.appendChild(document.createTextNode(msg));
     document.body.appendChild(t);
     setTimeout(() => { t.classList.add('pb-toast-out'); setTimeout(() => t.remove(), 300); }, 2500);
 }
@@ -41,6 +46,5 @@ export function toastSuccess(msg) {
 }
 
 export function structureIcon(type) {
-    const icons = { section: '&#9638;', column: '&#9646;', heading: 'H', text: 'T', image: '&#128247;', button: '&#128206;', callout: '&#9888;', table: '&#9638;', math: '&Sigma;', mega_menu: '&#9776;', lottie: '&#127916;' };
-    return icons[type] || '&#9679;';
+    return widgetIcon(type, 14);
 }

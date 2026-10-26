@@ -125,7 +125,7 @@ class FindReplaceController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Replace failed: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Falha ao substituir: ' . $e->getMessage()], 500);
         }
 
         return response()->json(['message' => "Replaced in {$count} elements", 'count' => $count]);

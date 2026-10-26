@@ -26,8 +26,8 @@ function renderPageSettings() {
     const s = currentPage.settings || {};
     const controls = [
         { key: 'container_width', label: 'Largura do Container', type: 'text', default: '1140px' },
-        { key: 'page_background', label: 'Fundo da Pagina', type: 'color', default: '#ffffff' },
-        { key: 'content_padding', label: 'Espacamento Interno', type: 'text', default: '0px' },
+        { key: 'page_background', label: 'Fundo da Página', type: 'color', default: '#ffffff' },
+        { key: 'content_padding', label: 'Espaçamento Interno', type: 'text', default: '0px' },
         { key: 'custom_css', label: 'CSS Personalizado', type: 'textarea', default: '' },
     ];
     controls.forEach(ctrl => {
@@ -70,5 +70,5 @@ function updatePageSetting(key, value) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf },
         body: JSON.stringify({ settings }),
-    }).catch(() => toastError('Falha ao atualizar configuracao da pagina'));
+    }).catch(() => toastError('Falha ao atualizar configuração da página'));
 }

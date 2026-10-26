@@ -84,6 +84,75 @@ class Element extends Model
             : $this->children()->exists();
     }
 
+    /** Devices that can override desktop values, in cascade order (mobile inherits tablet). */
+    public const RESPONSIVE_DEVICES = ['tablet', 'mobile'];
+
+    /** Keys the old editor stored as "<key>_<device>" inside settings/styles. */
+    public const LEGACY_RESPONSIVE_KEYS = ['padding_top', 'padding_bottom', 'padding_left', 'padding_right', 'margin_top', 'margin_bottom', 'margin_left', 'margin_right', 'font_size', 'line_height', 'letter_spacing', 'width', 'max_width', 'height', 'border_radius', 'gap'];
+
+    /**
+     * Overrides saved for one device: ['settings' => [...], 'styles' => [...]].
+     */
+    public function deviceOverrides(string $device): array
+    {
+        $saved = $this->responsive_settings[$device] ?? [];
+        $overrides = [
+            'settings' => is_array($saved['settings'] ?? null) ? $saved['settings'] : [],
+            'styles' => is_array($saved['styles'] ?? null) ? $saved['styles'] : [],
+        ];
+
+        // Values from the old "<key>_tablet" scheme still apply, unless a new override exists
+        foreach (['settings', 'styles'] as $bucket) {
+            $source = $this->{$bucket} ?? [];
+            foreach (self::LEGACY_RESPONSIVE_KEYS as $key) {
+                $legacy = $key . '_' . $device;
+                if (array_key_exists($legacy, $source) && $source[$legacy] !== '' && $source[$legacy] !== null
+                    && !array_key_exists($key, $overrides[$bucket])) {
+                    $overrides[$bucket][$key] = $source[$legacy];
+                }
+            }
+        }
+
+        return $overrides;
+    }
+
+    /**
+     * Effective settings and styles for a device, cascading desktop -> tablet -> mobile.
+     *
+     * @return array{0: array, 1: array} [settings, styles]
+     */
+    public function valuesForDevice(string $device = 'desktop'): array
+    {
+        $settings = $this->settings ?? [];
+        $styles = $this->styles ?? [];
+        if ($device === 'desktop') {
+            return [$settings, $styles];
+        }
+
+        foreach (self::RESPONSIVE_DEVICES as $step) {
+            $overrides = $this->deviceOverrides($step);
+            $settings = array_merge($settings, $overrides['settings']);
+            $styles = array_merge($styles, $overrides['styles']);
+            if ($step === $device) {
+                break;
+            }
+        }
+
+        return [$settings, $styles];
+    }
+
+    public function hasDeviceOverrides(): bool
+    {
+        foreach (self::RESPONSIVE_DEVICES as $device) {
+            $o = $this->deviceOverrides($device);
+            if ($o['settings'] !== [] || $o['styles'] !== []) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function getDepth(): int
     {
         $depth = 0;

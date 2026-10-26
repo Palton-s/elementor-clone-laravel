@@ -10,7 +10,7 @@
             <div class="pb-hero-orb pb-hero-orb-3"></div>
             <div class="pb-hero-content">
                 <div>
-                    <div class="pb-hero-badge">Project Hub</div>
+                    <div class="pb-hero-badge">Central de projetos</div>
                     <h1 class="pb-hero-title">Meus Projetos</h1>
                     <p class="pb-hero-sub">Selecione um projeto para gerenciar páginas, temas e popups</p>
                 </div>
@@ -126,7 +126,7 @@
                 <div class="form-group">
                     <label for="project-location">Local do projeto <span class="optional">(opcional)</span></label>
                     <input type="text" id="project-location" class="form-control" placeholder="Ex.: D:\Meus Projetos\Site-Institucional">
-                    <small style="color:#94a3b8;font-size:.75rem;display:block;margin-top:.35rem">Campo informativo, semelhante ao Unity Hub.</small>
+                    <small style="color:#94a3b8;font-size:.75rem;display:block;margin-top:.35rem">Campo apenas informativo.</small>
                 </div>
                 <div class="form-group">
                     <label for="project-description">Descrição <span class="optional">(opcional)</span></label>

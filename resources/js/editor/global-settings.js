@@ -1,5 +1,6 @@
 import state from './state.js';
 import { apiFetch, toastError, toastSuccess } from './utils.js';
+import { icon } from './icons.js';
 
 export function loadGlobalSettings() {
     return apiFetch(`/page-builder/pages/${state.pageId}/global-settings`)
@@ -16,9 +17,9 @@ export function saveGlobalSettings(colors, fonts) {
     .then(data => {
         state.globalSettings.global_colors = data.global_colors;
         state.globalSettings.global_fonts = data.global_fonts;
-        toastSuccess('Configuracoes globais salvas!');
+        toastSuccess('Configurações globais salvas!');
     })
-    .catch(() => toastError('Falha ao salvar configuracoes globais'));
+    .catch(() => toastError('Falha ao salvar configurações globais'));
 }
 
 export function showSiteSettings() {
@@ -38,7 +39,7 @@ function renderSiteSettings() {
     const body = document.getElementById('settings-body');
     if (!body) return;
     body.innerHTML = '';
-    document.getElementById('settings-title').textContent = 'Configuracoes do Site';
+    document.getElementById('settings-title').textContent = 'Configurações do Site';
     document.getElementById('settings-type').textContent = 'global';
     const empty = document.getElementById('settings-empty');
     const form = document.getElementById('settings-form');
@@ -113,7 +114,7 @@ function createGlobalColorRow(color, index, colors) {
     nameInput.style.cssText = 'flex:1;background:var(--pb-surface3);border:1px solid var(--pb-border);border-radius:4px;padding:4px 8px;color:var(--pb-text);font-size:.75rem;';
     nameInput.onchange = () => { colors[index].name = nameInput.value; saveGlobalSettings(colors, state.globalSettings.global_fonts); };
     const del = document.createElement('button');
-    del.textContent = '\u00D7'; del.title = 'Remover';
+    del.innerHTML = icon('x', 14); del.title = 'Remover';
     del.style.cssText = 'background:none;border:none;color:var(--pb-danger);cursor:pointer;font-size:1rem;padding:0 4px;';
     del.onclick = () => { colors.splice(index, 1); saveGlobalSettings(colors, state.globalSettings.global_fonts); renderSiteSettings(); };
     row.append(swatch, nameInput, del);
@@ -138,7 +139,7 @@ function createGlobalFontRow(font, index, fonts, systemFonts) {
     });
     sel.onchange = () => { fonts[index].family = sel.value; saveGlobalSettings(state.globalSettings.global_colors, fonts); };
     const del = document.createElement('button');
-    del.textContent = '\u00D7'; del.title = 'Remover';
+    del.innerHTML = icon('x', 14); del.title = 'Remover';
     del.style.cssText = 'background:none;border:none;color:var(--pb-danger);cursor:pointer;font-size:1rem;padding:0 4px;';
     del.onclick = () => { fonts.splice(index, 1); saveGlobalSettings(state.globalSettings.global_colors, fonts); renderSiteSettings(); };
     row.append(nameInput, sel, del);

@@ -11,13 +11,13 @@
         <div class="pb-hero-orb pb-hero-orb-3"></div>
         <div class="pb-hero-content">
             <div>
-                <div class="pb-hero-badge">Theme Builder</div>
+                <div class="pb-hero-badge">Construtor de temas</div>
                 <h1 class="pb-hero-title">Temas do Site</h1>
-                <p class="pb-hero-sub">Crie e gerencie templates de header, footer e layouts para personalizar o site</p>
+                <p class="pb-hero-sub">Crie e gerencie modelos de cabeçalho, rodapé e layouts para personalizar o site</p>
             </div>
             <a href="{{ route('page-builder.themes.create') }}" class="pb-hero-btn-ghost">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Novo Template
+                Novo modelo
             </a>
         </div>
         <div class="pb-stats">
@@ -73,18 +73,18 @@
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:#6366f1"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
                 </div>
             </div>
-            <h2 class="pb-empty-title">Nenhum template ainda</h2>
-            <p class="pb-empty-text">Crie templates de header, footer e layouts para personalizar a aparência do seu site com o construtor visual.</p>
+            <h2 class="pb-empty-title">Nenhum modelo ainda</h2>
+            <p class="pb-empty-text">Crie modelos de cabeçalho, rodapé e layouts para personalizar a aparência do seu site com o construtor visual.</p>
             <a href="{{ route('page-builder.themes.create') }}" class="pb-empty-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Criar Primeiro Template
+                Criar o primeiro modelo
             </a>
         </div>
     @else
         <div class="pb-toolbar">
             <div class="pb-search">
                 <svg class="pb-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="search-input" placeholder="Buscar templates..." class="pb-search-input">
+                <input type="text" id="search-input" placeholder="Buscar modelos..." class="pb-search-input">
             </div>
             <div class="pb-view-toggle">
                 <button class="pb-view-btn active" data-view="grid" onclick="setView('grid')" title="Grade">

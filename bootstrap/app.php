@@ -22,13 +22,25 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json(['error' => 'Resource not found'], 404);
+                return response()->json(['error' => 'Não encontrado'], 404);
             }
+        });
+
+        // Upload bigger than PHP's post_max_size: the request body is dropped before validation runs
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, $request) {
+            $limit = ini_get('post_max_size');
+            $message = "Arquivo grande demais para o servidor (limite atual do PHP: {$limit}). "
+                . 'Aumente upload_max_filesize e post_max_size no php.ini ou envie um arquivo menor.';
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => $message], 413);
+            }
+
+            return response($message, 413);
         });
 
         $exceptions->render(function (\Illuminate\Auth\Access\AuthorizationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json(['error' => 'Forbidden'], 403);
+                return response()->json(['error' => 'Você não tem permissão para fazer isso'], 403);
             }
         });
     })->create();

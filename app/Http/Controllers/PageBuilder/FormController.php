@@ -36,7 +36,7 @@ class FormController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Form submitted successfully',
+            'message' => 'Formulário enviado',
         ]);
     }
 

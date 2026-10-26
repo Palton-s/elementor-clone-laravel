@@ -1,4 +1,5 @@
 import { showToast, toastError, apiFetch } from './utils.js';
+import { icon } from './icons.js';
 
 let modal = null;
 
@@ -11,8 +12,8 @@ function ensureModal() {
         <div class="modal-overlay" style="position:absolute;inset:0;background:rgba(0,0,0,.5)" data-role="close"></div>
         <div class="modal-content" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;width:92%;max-width:680px;max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,.3)" onclick="event.stopPropagation()">
             <div style="padding:1.25rem 1.5rem;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between">
-                <h3 style="margin:0;font-size:1.1rem;color:#1e293b">&#128228; Importar HTML de Site Externo</h3>
-                <button data-role="close" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#64748b;line-height:1">&times;</button>
+                <h3 style="margin:0;font-size:1.1rem;color:#1e293b">${icon('upload', 18)} Importar HTML de Site Externo</h3>
+                <button data-role="close" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#64748b;line-height:1">${icon('x', 18)}</button>
             </div>
             <div style="padding:1.25rem 1.5rem">
                 <p style="color:#64748b;margin:0 0 1rem;font-size:.875rem">
@@ -22,7 +23,7 @@ function ensureModal() {
                     <label style="display:block;font-weight:600;margin-bottom:.35rem;font-size:.85rem;color:#374151">URL do Site <span style="color:#94a3b8;font-weight:400">(opcional)</span></label>
                     <div style="display:flex;gap:.5rem">
                         <input type="url" id="pb-html-url" placeholder="https://exemplo.com/pagina" style="flex:1;padding:.5rem .75rem;border:1px solid #e2e8f0;border-radius:8px;font-size:.85rem">
-                        <button type="button" id="pb-html-fetch-btn" style="white-space:nowrap;padding:.5rem .85rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:.8rem;cursor:pointer;color:#374151;font-weight:500">&#128269; Buscar</button>
+                        <button type="button" id="pb-html-fetch-btn" style="white-space:nowrap;padding:.5rem .85rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:.8rem;cursor:pointer;color:#374151;font-weight:500">${icon('search', 14)} Buscar</button>
                     </div>
                     <div id="pb-html-fetch-status" style="font-size:.78rem;margin-top:.3rem;display:none"></div>
                 </div>
@@ -39,7 +40,7 @@ function ensureModal() {
             </div>
             <div style="padding:1rem 1.5rem;border-top:1px solid #e2e8f0;display:flex;gap:.5rem;justify-content:flex-end">
                 <button data-role="close" style="padding:.5rem 1rem;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:.85rem;cursor:pointer;color:#374151">Cancelar</button>
-                <button id="pb-html-submit-btn" style="padding:.5rem 1rem;background:#3b82f6;border:none;border-radius:8px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:500">&#128228; Importar e Editar</button>
+                <button id="pb-html-submit-btn" style="padding:.5rem 1rem;background:#3b82f6;border:none;border-radius:8px;font-size:.85rem;cursor:pointer;color:#fff;font-weight:500">${icon('upload', 14)} Importar e Editar</button>
             </div>
         </div>
     `;
@@ -63,7 +64,7 @@ export function openHtmlImportModal(csrf) {
     document.getElementById('pb-html-error').style.display = 'none';
     document.getElementById('pb-html-fetch-status').style.display = 'none';
     document.getElementById('pb-html-submit-btn').disabled = false;
-    document.getElementById('pb-html-submit-btn').innerHTML = '&#128228; Importar e Editar';
+    document.getElementById('pb-html-submit-btn').innerHTML = icon('upload', 14) + ' Importar e Editar';
 
     const fetchBtn = document.getElementById('pb-html-fetch-btn');
     const submitBtn = document.getElementById('pb-html-submit-btn');
@@ -112,7 +113,7 @@ function fetchUrl(csrf) {
     })
     .finally(() => {
         fetchBtn.disabled = false;
-        fetchBtn.innerHTML = '&#128269; Buscar';
+        fetchBtn.innerHTML = icon('search', 14) + ' Buscar';
     });
 }
 
@@ -153,13 +154,13 @@ function submitImport(csrf) {
             errorEl.textContent = data.message || 'Erro na importação.';
             errorEl.style.display = '';
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '&#128228; Importar e Editar';
+            submitBtn.innerHTML = icon('upload', 14) + ' Importar e Editar';
         }
     })
     .catch(() => {
         errorEl.textContent = 'Falha na comunicação com o servidor.';
         errorEl.style.display = '';
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '&#128228; Importar e Editar';
+        submitBtn.innerHTML = icon('upload', 14) + ' Importar e Editar';
     });
 }

@@ -14,8 +14,8 @@ class ImageBoxWidget extends BaseWidget
 
         $this->defaultSettings = [
             'image' => [],
-            'title' => 'Image Title',
-            'description' => 'Add a short description here to describe this image.',
+            'title' => 'Título da imagem',
+            'description' => 'Escreva aqui uma breve descrição desta imagem.',
             'title_tag' => 'h3',
             'image_width' => '100%',
             'title_color' => '#1f2937',
@@ -68,7 +68,7 @@ class ImageBoxWidget extends BaseWidget
         if ($imageUrl) {
             $html .= '<img src="' . $imageUrl . '" alt="' . $imageAlt . '" style="width: ' . $imageWidth . '; border-radius: ' . $borderRadius . '; display: block; max-width: 100%;">';
         } else {
-            $html .= '<div style="width: ' . $imageWidth . '; height: 200px; background: #e5e7eb; border-radius: ' . $borderRadius . '; display: flex; align-items: center; justify-content: center; color: #9ca3af;">No image selected</div>';
+            $html .= '<div style="width: ' . $imageWidth . '; height: 200px; background: #e5e7eb; border-radius: ' . $borderRadius . '; display: flex; align-items: center; justify-content: center; color: #9ca3af;">Nenhuma imagem selecionada</div>';
         }
 
         $html .= '<figcaption style="padding: 16px 0 0 0;">';
@@ -105,7 +105,7 @@ class ImageBoxWidget extends BaseWidget
         if ($imageUrl) {
             $html .= '<img src="' . $imageUrl . '" alt="' . $imageAlt . '" style="width: ' . $imageWidth . '; border-radius: ' . $borderRadius . '; max-width: 100%;">';
         } else {
-            $html .= '<div style="width: ' . $imageWidth . '; height: 160px; background: #e5e7eb; border-radius: ' . $borderRadius . '; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px;">No image selected</div>';
+            $html .= '<div style="width: ' . $imageWidth . '; height: 160px; background: #e5e7eb; border-radius: ' . $borderRadius . '; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px;">Nenhuma imagem selecionada</div>';
         }
 
         if ($title) {

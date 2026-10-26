@@ -13,7 +13,7 @@ class CounterWidget extends BaseWidget
         $this->keywords = ['counter', 'number', 'animated', 'count'];
 
         $this->defaultSettings = [
-            'title' => 'Projects Completed',
+            'title' => 'Projetos concluídos',
             'prefix' => '',
             'suffix' => '+',
             'number' => 100,

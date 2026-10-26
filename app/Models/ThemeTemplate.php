@@ -89,12 +89,12 @@ class ThemeTemplate extends Model
     public function getTypeLabel(): string
     {
         return match ($this->type) {
-            'header' => 'Header',
-            'footer' => 'Footer',
-            'single' => 'Single',
-            'archive' => 'Archive',
-            '404' => '404 Page',
-            'search_results' => 'Search Results',
+            'header' => 'Cabeçalho',
+            'footer' => 'Rodapé',
+            'single' => 'Artigo',
+            'archive' => 'Listagem',
+            '404' => 'Página 404',
+            'search_results' => 'Resultados de busca',
             default => ucfirst($this->type),
         };
     }
@@ -120,12 +120,12 @@ class ThemeTemplate extends Model
     public static function typeOptions(): array
     {
         return [
-            'header' => 'Header',
-            'footer' => 'Footer',
-            'single' => 'Single',
-            'archive' => 'Archive',
-            '404' => '404 Page',
-            'search_results' => 'Search Results',
+            'header' => 'Cabeçalho',
+            'footer' => 'Rodapé',
+            'single' => 'Artigo',
+            'archive' => 'Listagem',
+            '404' => 'Página 404',
+            'search_results' => 'Resultados de busca',
         ];
     }
 }

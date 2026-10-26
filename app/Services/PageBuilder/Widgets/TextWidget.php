@@ -13,7 +13,7 @@ class TextWidget extends BaseWidget
         $this->keywords = ['text', 'paragraph', 'content', 'editor'];
 
         $this->defaultSettings = [
-            'content' => '<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>',
+            'content' => '<p>Escreva aqui o seu texto. Clique para editar e use a barra de formatação para deixar em negrito, itálico ou criar listas e links.</p>',
             'alignment' => 'left',
             'color' => '#666666',
             'font_size' => '16px',

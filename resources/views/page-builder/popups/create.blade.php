@@ -1,13 +1,13 @@
 @extends('page-builder.layouts.app')
 
-@section('title', isset($popup) ? 'Edit Popup' : 'New Popup')
+@section('title', isset($popup) ? 'Editar popup' : 'Novo popup')
 
 @section('content')
 <div class="container">
     <div class="page-header">
         <div>
-            <h1>{{ isset($popup) ? 'Edit Popup' : 'New Popup' }}</h1>
-            <p style="color:#64748b;font-size:.875rem;margin-top:.25rem">Configure the popup type, triggers, and associated content</p>
+            <h1>{{ isset($popup) ? 'Editar popup' : 'Novo popup' }}</h1>
+            <p style="color:#64748b;font-size:.875rem;margin-top:.25rem">Defina o tipo do popup, quando ele aparece e o seu conteúdo</p>
         </div>
         <a href="{{ route('page-builder.popups.index') }}" class="btn btn-secondary">
             &larr; Back
@@ -21,16 +21,16 @@
 
             <div class="form-row">
                 <div class="form-group" style="flex:2">
-                    <label for="title">Title <span class="required">*</span></label>
+                    <label for="title">Título <span class="required">*</span></label>
                     <input type="text" id="title" name="title" class="form-control" required
                            value="{{ old('title', $popup->title ?? '') }}"
                            placeholder="Ex: Newsletter Signup, Special Offer">
                 </div>
 
                 <div class="form-group" style="flex:1">
-                    <label for="type">Type <span class="required">*</span></label>
+                    <label for="type">Tipo <span class="required">*</span></label>
                     <select id="type" name="type" class="form-control form-select" required>
-                        <option value="">Select type...</option>
+                        <option value="">Selecione o tipo...</option>
                         @foreach($types as $key)
                             <option value="{{ $key }}" {{ (old('type', $popup->type ?? request('type', '')) === $key) ? 'selected' : '' }}>
                                 {{ ucfirst($key) }}
@@ -42,9 +42,9 @@
 
             @if(!isset($popup))
             <div class="form-group">
-                <label for="template">Starter Template <span class="optional">(pre-preenche o conteúdo)</span></label>
+                <label for="template">Modelo inicial <span class="optional">(pre-preenche o conteúdo)</span></label>
                 <select id="template" name="template" class="form-control form-select">
-                    <option value="">-- Blank (conteúdo vazio) --</option>
+                    <option value="">-- Em branco (sem conteúdo) --</option>
                     @foreach($popupTemplates as $key => $tmpl)
                         <option value="{{ $key }}" {{ request('template') === $key ? 'selected' : '' }}>
                             {{ $tmpl['name'] }} — {{ $tmpl['description'] }}
@@ -52,18 +52,18 @@
                     @endforeach
                 </select>
                 <p style="font-size:.78rem;color:#94a3b8;margin-top:.35rem">
-                    O starter também define largura e posição padrão do popup.
+                    O modelo inicial também define largura e posição padrão do popup.
                 </p>
             </div>
             @endif
 
             @if(!isset($popup))
             <div class="form-group">
-                <label>Triggers</label>
+                <label>Quando exibir</label>
                 <div id="triggers-list" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem"></div>
                 <div style="display:flex;gap:.5rem">
                     <select id="trigger-type" class="form-control form-select" style="flex:1">
-                        <option value="">Select trigger...</option>
+                        <option value="">Selecione quando exibir...</option>
                         @foreach($triggerTypes as $key => $config)
                             <option value="{{ $key }}" data-has-value="{{ $config['has_value'] ? 'true' : 'false' }}" data-placeholder="{{ $config['placeholder'] ?? '' }}">
                                 {{ $config['label'] }}
@@ -71,9 +71,9 @@
                         @endforeach
                     </select>
                     <div id="trigger-value-wrap" style="display:none;flex:1">
-                        <input type="text" id="trigger-value" class="form-control" placeholder="Value">
+                        <input type="text" id="trigger-value" class="form-control" placeholder="Valor">
                     </div>
-                    <button type="button" id="add-trigger" class="btn btn-secondary" disabled>+ Add</button>
+                    <button type="button" id="add-trigger" class="btn btn-secondary" disabled>+ Adicionar</button>
                 </div>
             </div>
             @endif
@@ -82,22 +82,22 @@
             <div class="form-group">
                 <label for="status">Status</label>
                 <select id="status" name="status" class="form-control form-select">
-                    <option value="draft" selected>Draft</option>
-                    <option value="published">Published</option>
+                    <option value="draft" selected>Rascunho</option>
+                    <option value="published">Publicado</option>
                 </select>
             </div>
             @endif
 
             <div style="display:flex;gap:.75rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e2e8f0">
                 <button type="submit" class="btn btn-primary">
-                    {{ isset($popup) ? 'Update Popup' : 'Create Popup' }}
+                    {{ isset($popup) ? 'Salvar popup' : 'Criar popup' }}
                 </button>
                 @if(!isset($popup))
                     <button type="submit" name="next" value="editor" class="btn btn-primary" style="background:linear-gradient(135deg,#22c55e,#16a34a)">
-                        Create & Open Editor
+                        Criar e abrir o editor
                     </button>
                 @endif
-                <a href="{{ route('page-builder.popups.index') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ route('page-builder.popups.index') }}" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>
     </div>
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hasValue = opt.dataset.hasValue === 'true';
         triggerValueWrap.style.display = hasValue ? 'block' : 'none';
         if (hasValue) {
-            triggerValue.placeholder = opt.dataset.placeholder || 'Value';
+            triggerValue.placeholder = opt.dataset.placeholder || 'Valor';
         }
         addBtn.disabled = !this.value;
     });
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderTriggers() {
         triggersList.innerHTML = '';
         if (triggers.length === 0) {
-            triggersList.innerHTML = '<div style="padding:.5rem;text-align:center;color:#94a3b8;font-size:.82rem;background:#f8fafc;border-radius:6px">No triggers configured</div>';
+            triggersList.innerHTML = '<div style="padding:.5rem;text-align:center;color:#94a3b8;font-size:.82rem;background:#f8fafc;border-radius:6px">Nenhum gatilho configurado</div>';
             return;
         }
         triggers.forEach((t, idx) => {

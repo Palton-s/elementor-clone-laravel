@@ -13,7 +13,7 @@ class ButtonWidget extends BaseWidget
         $this->keywords = ['button', 'link', 'cta', 'click'];
 
         $this->defaultSettings = [
-            'text' => 'Click Here',
+            'text' => 'Clique aqui',
             'link' => '#',
             'link_target' => '_self',
             'alignment' => 'left',

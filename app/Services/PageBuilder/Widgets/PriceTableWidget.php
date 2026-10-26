@@ -13,18 +13,18 @@ class PriceTableWidget extends BaseWidget
         $this->keywords = ['price', 'pricing', 'table', 'plan', 'package'];
 
         $this->defaultSettings = [
-            'title' => 'Professional',
+            'title' => 'Profissional',
             'price' => '29',
             'currency' => 'R$',
-            'period' => '/month',
+            'period' => '/mês',
             'features' => [
-                ['text' => '5 Projects', 'included' => true],
-                ['text' => '10GB Storage', 'included' => true],
-                ['text' => 'Priority Support', 'included' => true],
-                ['text' => 'Custom Domain', 'included' => false],
-                ['text' => 'API Access', 'included' => false],
+                ['text' => '5 projetos', 'included' => true],
+                ['text' => '10 GB de armazenamento', 'included' => true],
+                ['text' => 'Suporte prioritário', 'included' => true],
+                ['text' => 'Domínio próprio', 'included' => false],
+                ['text' => 'Acesso à API', 'included' => false],
             ],
-            'button_text' => 'Choose',
+            'button_text' => 'Escolher',
             'button_link' => '#',
             'featured' => false,
             'featured_color' => '#6366f1',

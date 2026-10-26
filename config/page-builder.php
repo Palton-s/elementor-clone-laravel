@@ -71,4 +71,13 @@ return [
         'home_slug' => env('PAGE_BUILDER_HOME_SLUG', 'home'),
         'cache_ttl' => env('PAGE_BUILDER_THEME_CACHE_TTL', 300),
     ],
+
+    'export' => [
+        // Download CDN/external assets (CSS, JS, fonts, images) into the zip so the site works offline
+        'download_remote' => env('PAGE_BUILDER_EXPORT_REMOTE', true),
+        'remote_timeout' => env('PAGE_BUILDER_EXPORT_TIMEOUT', 20),
+        'max_file_mb' => env('PAGE_BUILDER_EXPORT_MAX_FILE_MB', 200),
+        'max_total_mb' => env('PAGE_BUILDER_EXPORT_MAX_TOTAL_MB', 1024),
+        'cache_days' => env('PAGE_BUILDER_EXPORT_CACHE_DAYS', 7),
+    ],
 ];

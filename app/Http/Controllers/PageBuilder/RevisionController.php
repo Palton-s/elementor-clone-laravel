@@ -43,7 +43,7 @@ class RevisionController extends Controller
         $this->pageBuilder->restoreRevision($page, $revision);
 
         return response()->json([
-            'message' => 'Revision restored successfully',
+            'message' => 'Revisão restaurada',
             'page' => $page->fresh(),
         ]);
     }
@@ -71,7 +71,7 @@ class RevisionController extends Controller
         $revision->delete();
 
         return response()->json([
-            'message' => 'Revision deleted successfully',
+            'message' => 'Revisão excluída',
         ]);
     }
 
@@ -108,7 +108,7 @@ class RevisionController extends Controller
         );
 
         return response()->json([
-            'message' => 'Auto-save queued successfully',
+            'message' => 'Salvamento automático agendado',
         ]);
     }
 }

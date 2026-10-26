@@ -46,8 +46,9 @@ class GoogleMapsWidget extends BaseWidget
     public function render(array $settings, array $content = [], array $styles = []): string
     {
         $settings = $this->prepareSettings($settings);
-        $latitude = htmlspecialchars($settings['latitude'], ENT_QUOTES, 'UTF-8');
-        $longitude = htmlspecialchars($settings['longitude'], ENT_QUOTES, 'UTF-8');
+        // A cleared or mistyped coordinate must not break the whole page: fall back to the defaults
+        $latitude = is_numeric($settings['latitude']) ? (float) $settings['latitude'] : (float) $this->defaultSettings['latitude'];
+        $longitude = is_numeric($settings['longitude']) ? (float) $settings['longitude'] : (float) $this->defaultSettings['longitude'];
         $zoom = (int) $settings['zoom'];
         $height = htmlspecialchars($settings['height'], ENT_QUOTES, 'UTF-8');
         $mapType = htmlspecialchars($settings['map_type'], ENT_QUOTES, 'UTF-8');
@@ -73,8 +74,8 @@ class GoogleMapsWidget extends BaseWidget
     public function renderEditor(array $settings, array $content = [], array $styles = []): string
     {
         $settings = $this->prepareSettings($settings);
-        $latitude = htmlspecialchars($settings['latitude'], ENT_QUOTES, 'UTF-8');
-        $longitude = htmlspecialchars($settings['longitude'], ENT_QUOTES, 'UTF-8');
+        $latitude = is_numeric($settings['latitude']) ? (float) $settings['latitude'] : (float) $this->defaultSettings['latitude'];
+        $longitude = is_numeric($settings['longitude']) ? (float) $settings['longitude'] : (float) $this->defaultSettings['longitude'];
         $height = htmlspecialchars($settings['height'], ENT_QUOTES, 'UTF-8');
         $borderRadius = htmlspecialchars($settings['border_radius'], ENT_QUOTES, 'UTF-8');
         $address = htmlspecialchars($settings['address'], ENT_QUOTES, 'UTF-8');

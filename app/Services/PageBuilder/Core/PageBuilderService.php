@@ -329,7 +329,7 @@ class PageBuilderService
     {
         $newElement = $element->replicate();
         $newElement->uuid = (string) Str::uuid();
-        $newElement->name = $element->name . ' (copy)';
+        $newElement->name = $element->name . ' (cópia)';
         $newElement->parent_id = $parentId;
         $newElement->order = $order;
         $newElement->save();
@@ -510,31 +510,7 @@ class PageBuilderService
             }
 
             if (is_string($item) && $this->containsHtml($item)) {
-                $allowed = '<p><br><strong><em><u><s><sup><sub><mark><ul><ol><li><dl><dt><dd><a><img><div><span><h1><h2><h3><h4><h5><h6><blockquote><pre><code><hr><table><thead><tbody><tr><th><td><figure><figcaption><video><source><iframe>';
-                $clean = strip_tags($item, $allowed);
-
-                $clean = preg_replace_callback('/<a\s[^>]*href\s*=\s*["\']([^"\']*)["\'][^>]*>/i', function ($m) {
-                    $url = filter_var($m[1], FILTER_SANITIZE_URL);
-                    if ($url && (str_starts_with($url, 'http://') || str_starts_with($url, 'https://') || str_starts_with($url, 'mailto:') || str_starts_with($url, 'tel:') || str_starts_with($url, '/'))) {
-                        return str_replace($m[1], $url, $m[0]);
-                    }
-                    return str_replace($m[1], '#', $m[0]);
-                }, $clean);
-
-                $clean = preg_replace_callback('/<img\s[^>]*src\s*=\s*["\']([^"\']*)["\'][^>]*>/i', function ($m) {
-                    $url = filter_var($m[1], FILTER_SANITIZE_URL);
-                    if ($url && (str_starts_with($url, 'http://') || str_starts_with($url, 'https://') || str_starts_with($url, 'data:image/'))) {
-                        return str_replace($m[1], $url, $m[0]);
-                    }
-                    return str_replace($m[1], '', $m[0]);
-                }, $clean);
-
-                $clean = preg_replace('/\s+on\w+\s*=\s*"[^"]*"/i', '', $clean);
-                $clean = preg_replace("/\s+on\w+\s*=\s*'[^']*'/i", '', $clean);
-                $clean = preg_replace('/\s+on\w+\s*=\s*[^\s>]+/i', '', $clean);
-                $clean = preg_replace('/<([a-z]+)[^>]*javascript\s*:/i', '<$1', $clean);
-
-                return $clean;
+                return HtmlSanitizer::sanitizeRichText($item);
             }
 
             if (is_string($item)) {
@@ -563,9 +539,10 @@ class PageBuilderService
                 } elseif (str_contains($key, 'url') || str_contains($key, 'link') || str_contains($key, 'src')) {
                     $sanitized[$key] = $this->sanitizeUrl($value);
                 } elseif (str_contains($key, 'content') || str_contains($key, 'html') || $key === 'content') {
-                    $allowed = '<p><br><strong><em><u><s><sup><sub><mark><ul><ol><li><dl><dt><dd><a><img><div><span><h1><h2><h3><h4><h5><h6><blockquote><pre><code><hr><table><thead><tbody><tr><th><td><figure><figcaption><video><source><iframe>';
-                    $sanitized[$key] = strip_tags($value, $allowed);
-                } elseif (in_array($key, ['css_classes', 'css_id', 'name', 'title', 'alt', 'text', 'label'])) {
+                    $sanitized[$key] = HtmlSanitizer::sanitizeRichText($value);
+                } elseif (in_array($key, ['css_classes', 'css_id'], true)) {
+                    $sanitized[$key] = HtmlSanitizer::sanitizeIdentifiers($value);
+                } elseif (in_array($key, ['name', 'title', 'alt', 'text', 'label'])) {
                     $sanitized[$key] = strip_tags($value);
                 } else {
                     $sanitized[$key] = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8', false);
@@ -588,13 +565,8 @@ class PageBuilderService
 
     protected function sanitizeUrl(string $url): string
     {
-        $url = trim($url);
-
-        if (preg_match('/^\s*(javascript|vbscript|data:text\/html)/i', $url)) {
-            return '';
-        }
-
-        return $url;
+        // link_target and similar keys also land here; plain words pass through unchanged
+        return HtmlSanitizer::sanitizeUrlValue($url);
     }
 
     public function sanitizeStyles(array $styles): array
@@ -617,6 +589,10 @@ class PageBuilderService
             $value = preg_replace('/(javascript|vbscript)\s*:/i', '', $value);
             $value = preg_replace('/-moz-binding\s*:/i', '', $value);
             $value = preg_replace('/url\s*\(\s*[\'"]?\s*(javascript|vbscript|data:text\/html)[^)]*\)/i', 'none', $value);
+            // Style values are written into style="..." attributes by the widgets
+            $value = in_array($key, ['css_classes', 'css_id'], true)
+                ? HtmlSanitizer::sanitizeIdentifiers($value)
+                : HtmlSanitizer::sanitizeCssValue($value);
 
             $sanitized[$key] = $value;
         }

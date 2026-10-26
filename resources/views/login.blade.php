@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - {{ config('app.name') }}</title>
+    <title>Entrar - {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -75,7 +75,7 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">E-mail</label>
                     <input type="email" name="email" id="email" placeholder="seu@email.com" required>
                 </div>
                 <div class="form-group">

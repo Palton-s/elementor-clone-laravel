@@ -1,11 +1,49 @@
 import { escHtml } from './utils.js';
+import { icon } from './icons.js';
+import { widgetLabel, elementName } from './i18n.js';
+
+// Mirrors Element::valuesForDevice() in PHP: desktop -> tablet -> mobile cascade
+export const RESPONSIVE_DEVICES = ['tablet', 'mobile'];
+export const LEGACY_RESPONSIVE_KEYS = ['padding_top', 'padding_bottom', 'padding_left', 'padding_right', 'margin_top', 'margin_bottom', 'margin_left', 'margin_right', 'font_size', 'line_height', 'letter_spacing', 'width', 'max_width', 'height', 'border_radius', 'gap'];
+
+export function deviceOverrides(el, device) {
+    const saved = (el.responsive_settings && el.responsive_settings[device]) || {};
+    const out = { settings: { ...(saved.settings || {}) }, styles: { ...(saved.styles || {}) } };
+    for (const bucket of ['settings', 'styles']) {
+        const source = el[bucket] || {};
+        for (const key of LEGACY_RESPONSIVE_KEYS) {
+            const legacy = key + '_' + device;
+            if (source[legacy] !== undefined && source[legacy] !== '' && source[legacy] !== null && !(key in out[bucket])) {
+                out[bucket][key] = source[legacy];
+            }
+        }
+    }
+    return out;
+}
+
+export function valuesForDevice(el, device = 'desktop') {
+    let settings = { ...(el.settings || {}) };
+    let styles = { ...(el.styles || {}) };
+    if (device === 'desktop') return { settings, styles };
+    for (const step of RESPONSIVE_DEVICES) {
+        const o = deviceOverrides(el, step);
+        settings = { ...settings, ...o.settings };
+        styles = { ...styles, ...o.styles };
+        if (step === device) break;
+    }
+    return { settings, styles };
+}
+
+function currentDevice(state) {
+    return (state && state.responsiveMode) || 'desktop';
+}
 
 export function renderCanvas(state, elements, parentEl) {
     const dz = document.getElementById('canvas-dropzone');
     if (!parentEl) {
         dz.innerHTML = '';
         if (!elements || elements.length === 0) {
-            dz.innerHTML = `<div class="pb-empty-canvas" id="empty-canvas"><div class="pb-empty-icon">&#128161;</div><p><strong>Arraste widgets do painel esquerdo</strong><br>para comecar a construir sua pagina</p></div>`;
+            dz.innerHTML = `<div class="pb-empty-canvas" id="empty-canvas"><div class="pb-empty-icon">${icon('pointer', 44)}</div><p><strong>Arraste widgets do painel esquerdo</strong><br>para comecar a construir sua página</p></div>`;
             return;
         }
     }
@@ -15,46 +53,73 @@ export function renderCanvas(state, elements, parentEl) {
         div.dataset.elId = el.id;
         div.dataset.elType = el.type;
         div.dataset.isContainer = el.is_container ? 'true' : 'false';
-        div.innerHTML = elementHtml(el);
+        const device = currentDevice(state);
+        const values = valuesForDevice(el, device);
+        div.innerHTML = elementHtml(el, device);
         div.onclick = (e) => { e.stopPropagation(); state.onSelectElement(el.id, e.ctrlKey || e.metaKey); };
-        const dragHandle = div.querySelector('.pb-el-drag');
-        if (dragHandle) {
-            dragHandle.ondragstart = (e) => {
-                e.dataTransfer.setData('text/plain', String(el.id));
-                e.dataTransfer.effectAllowed = 'move';
-                div.style.opacity = '.4';
-            };
-            dragHandle.ondragend = () => { div.style.opacity = ''; };
+        if (el.type === 'column') {
+            // The .pb-el wrapper is the flex item inside the parent row, so it carries the width
+            let pct = columnPercent({ ...values.settings, ...values.styles });
+            // Same default as the published page: phones stack columns unless a phone width was chosen
+            if (device === 'mobile' && valuesForDevice(el, 'mobile').settings.column_width === (el.settings || {}).column_width) pct = 100;
+            div.style.flex = `0 1 ${pct}%`;
+            div.style.maxWidth = `${pct}%`;
         }
         if (parentEl) parentEl.appendChild(div);
         else dz.appendChild(div);
         if (el.is_container) {
             const childContainer = document.createElement('div');
             childContainer.className = 'pb-el-children';
+            childContainer.dataset.parentId = el.id;
+            const s = { ...values.settings, ...values.styles };
             if (el.type === 'section') {
-                const sectionContent = div.querySelector('.pb-section-content');
-                if (sectionContent) {
-                    sectionContent.appendChild(childContainer);
-                } else {
-                    div.appendChild(childContainer);
-                }
-            } else {
-                div.appendChild(childContainer);
+                childContainer.classList.add('pb-row');
+                if (s.align_items) childContainer.style.alignItems = s.align_items;
+                if (s.justify_content) childContainer.style.justifyContent = s.justify_content;
+                if (s.flex_wrap) childContainer.style.flexWrap = s.flex_wrap;
+                if (s.gap && s.gap !== 'default') childContainer.style.gap = s.gap;
+            } else if (el.type === 'inner_section') {
+                childContainer.classList.add('pb-row');
+                const dir = s.column_direction || 'row';
+                childContainer.style.flexDirection = dir;
+                childContainer.style.flexWrap = 'nowrap';
+                childContainer.style.gap = s.column_gap || '20px';
             }
-            if (el.children && el.children.length > 0) {
-                renderCanvas(state, el.children, childContainer);
-            } else {
-                const emptyDrop = document.createElement('div');
-                emptyDrop.className = 'pb-empty-drop';
-                emptyDrop.innerHTML = '<span>+</span>';
-                childContainer.appendChild(emptyDrop);
-            }
+            const host = div.querySelector(
+                el.type === 'section' ? '.pb-section-content'
+                : el.type === 'column' ? '.pb-column-content'
+                : el.type === 'inner_section' ? '.pb-inner-section-editor'
+                : ':scope > .pb-el-content'
+            );
+            (host || div).appendChild(childContainer);
+            const hasChildren = el.children && el.children.length > 0;
+            if (hasChildren) renderCanvas(state, el.children, childContainer);
+            // Empty containers get a big "+", filled ones a small one at the end; both pick this container as insert target
+            const adder = document.createElement('div');
+            adder.className = hasChildren ? 'pb-empty-drop pb-add-inside' : 'pb-empty-drop';
+            adder.dataset.parentId = el.id;
+            adder.title = 'Clique e escolha um widget na aba Inserir para adicioná-lo aqui';
+            adder.innerHTML = icon('plus', hasChildren ? 14 : 20);
+            adder.onclick = (e) => { e.stopPropagation(); state.setInsertTarget(el.id); };
+            childContainer.appendChild(adder);
         }
     });
     if (!parentEl) {
         state.renderMath();
         setTimeout(() => initCanvasFeatures(), 100);
     }
+}
+
+const COL_CLASS_MAP = { 'col-1': 8.33, 'col-2': 16.67, 'col-3': 25, 'col-4': 33.33, 'col-5': 41.67, 'col-6': 50, 'col-7': 58.33, 'col-8': 66.67, 'col-9': 75, 'col-10': 83.33, 'col-11': 91.67, 'col-12': 100 };
+
+export function columnPercent(s) {
+    const colWidth = s.column_width || 'col-4';
+    if (typeof colWidth === 'number') return Math.max(1, Math.min(100, colWidth));
+    if (typeof colWidth === 'string' && COL_CLASS_MAP[colWidth]) return COL_CLASS_MAP[colWidth];
+    if (typeof colWidth === 'string' && !colWidth.startsWith('col-') && !isNaN(parseFloat(colWidth))) {
+        return Math.max(1, Math.min(100, parseFloat(colWidth) || 33));
+    }
+    return 33.33;
 }
 
 export function renderMath() {
@@ -74,19 +139,20 @@ export function renderMath() {
     });
 }
 
-export function elementHtml(el) {
-    let name = el.name || el.type;
-    const s = { ...(el.settings || {}), ...(el.styles || {}) };
+export function elementHtml(el, device = 'desktop') {
+    let name = elementName(el);
+    const values = valuesForDevice(el, device);
+    const s = { ...values.settings, ...values.styles };
     let preview = '';
     switch (el.type) {
         case 'heading': {
             const tagSizeMap = {h1:'2.2em',h2:'1.8em',h3:'1.4em',h4:'1.15em',h5:'1em',h6:'.85em'};
             const sizeMap = {small:'1.2em',medium:'2.5em',large:'3em',xl:'3.5em',xxl:'4.5em'};
             const fs = s.size && sizeMap[s.size] ? sizeMap[s.size] : (tagSizeMap[s.tag] || '1.8em');
-            preview = `<${s.tag || 'h2'} style="text-align:${s.alignment||'left'};color:${s.color||'#333'};font-size:${fs};font-weight:${s.font_weight||'700'};line-height:${s.line_height||'1.4'}">${escHtml(s.title||'Heading')}</${s.tag || 'h2'}>`;
+            preview = `<${s.tag || 'h2'} style="text-align:${s.alignment||'left'};color:${s.color||'#333'};font-size:${fs};font-weight:${s.font_weight||'700'};line-height:${s.line_height||'1.4'}">${escHtml(s.title||'Título')}</${s.tag || 'h2'}>`;
             break;
         }
-        case 'text': preview = `<div style="text-align:${s.alignment||'left'};color:${s.color||'#666'};font-size:${s.font_size||'16px'};font-weight:${s.font_weight||'400'};line-height:${s.line_height||'1.7'}">${s.content||'<p>Text content</p>'}</div>`; break;
+        case 'text': preview = `<div style="text-align:${s.alignment||'left'};color:${s.color||'#666'};font-size:${s.font_size||'16px'};font-weight:${s.font_weight||'400'};line-height:${s.line_height||'1.7'}">${s.content||'<p>Conteúdo de texto</p>'}</div>`; break;
         case 'image':
             if (s.image && s.image.url) preview = `<div style="text-align:${s.alignment||'center'}"><img src="${escHtml(s.image.url)}" alt="${escHtml(s.image.alt||'')}" style="width:${s.width||'100%'};max-width:${s.max_width||'100%'};height:${s.height||'auto'};object-fit:${s.object_fit||'cover'};border-radius:${s.border_radius||'0px'};opacity:${s.opacity||1}"></div>`;
             else preview = `<div class="pb-image-placeholder" style="text-align:center;padding:2rem;color:#999">Nenhuma imagem selecionada</div>`;
@@ -94,7 +160,7 @@ export function elementHtml(el) {
         case 'button': {
             const sizeMap = {small:{p:'8px 16px',f:'14px'},medium:{p:'12px 24px',f:'16px'},large:{p:'16px 32px',f:'18px'},xl:{p:'20px 40px',f:'20px'}};
             const sz = sizeMap[s.size]||sizeMap.medium;
-            const btn = `<button style="background-color:${s.background_color||'#007bff'};color:${s.text_color||'#fff'};border:${s.border_width||'0px'} solid ${s.border_color||'transparent'};border-radius:${s.border_radius||'4px'};padding:${sz.p};font-size:${sz.f};font-weight:${s.font_weight||'500'};cursor:pointer;display:inline-block">${escHtml(s.text||'Button')}</button>`;
+            const btn = `<button style="background-color:${s.background_color||'#007bff'};color:${s.text_color||'#fff'};border:${s.border_width||'0px'} solid ${s.border_color||'transparent'};border-radius:${s.border_radius||'4px'};padding:${sz.p};font-size:${sz.f};font-weight:${s.font_weight||'500'};cursor:pointer;display:inline-block">${escHtml(s.text||'Botão')}</button>`;
             preview = s.alignment !== 'stretch' ? `<div style="text-align:${s.alignment||'left'}">${btn}</div>` : btn;
             break;
         }
@@ -117,7 +183,7 @@ export function elementHtml(el) {
                 html += '<tr>';
                 for (let c=0;c<cols;c++) {
                     if (r===0&&hd) html += `<th style="background:#f1f5f9;border:${bw} solid ${bc};padding:${s.cell_padding||'10px 14px'};font-weight:600;text-align:left">Cabecalho ${c+1}</th>`;
-                    else html += `<td style="border:${bw} solid ${bc};padding:${s.cell_padding||'10px 14px'}">Conteudo</td>`;
+                    else html += `<td style="border:${bw} solid ${bc};padding:${s.cell_padding||'10px 14px'}">Conteúdo</td>`;
                 }
                 html += '</tr>';
             }
@@ -134,7 +200,18 @@ export function elementHtml(el) {
             break;
         }
         case 'video': {
-            if (s.video_url) {
+            // Same rule as VideoWidget::fileSource(): uploaded file, or a direct video URL, plays in <video>
+            const vFile = (s.video_file || '').trim();
+            const vUrl = (s.video_url || '').trim();
+            const fileSrc = vFile && (s.video_type === 'upload' || !vUrl) ? vFile
+                : (s.video_type !== 'upload' && /\.(mp4|webm|ogv|ogg|mov|m4v)(\?.*)?$/i.test(vUrl) ? vUrl : '');
+            if (fileSrc) {
+                const ratioMap = {'16:9':'56.25%','4:3':'75%','1:1':'100%','21:9':'42.86%'};
+                const pad = ratioMap[s.aspect_ratio]||'56.25%';
+                const wStyle = `width:${s.width||'100%'};max-width:${s.max_width||'100%'};margin:0`;
+                const mAlign = s.alignment==='center'?'margin-left:auto;margin-right:auto':s.alignment==='right'?'margin-left:auto':'';
+                preview = `<div style="${wStyle};${mAlign}"><div style="position:relative;padding-bottom:${pad};height:0;overflow:hidden;border-radius:8px;background:#000"><video src="${escHtml(fileSrc)}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:0"${s.controls!==false?' controls':''}${s.loop?' loop':''}${s.mute?' muted':''} playsinline preload="metadata"></video></div></div>`;
+            } else if (s.video_url) {
                 const ratioMap = {'16:9':'56.25%','4:3':'75%','1:1':'100%','21:9':'42.86%'};
                 const pad = ratioMap[s.aspect_ratio]||'56.25%';
                 let embedUrl = s.video_url;
@@ -164,7 +241,7 @@ export function elementHtml(el) {
                 const mAlign = s.alignment==='center'?'margin-left:auto;margin-right:auto':s.alignment==='right'?'margin-left:auto':'';
                 preview = `<div style="${wStyle};${mAlign}"><div style="position:relative;padding-bottom:${pad};height:0;overflow:hidden;border-radius:8px"><iframe src="${escHtml(embedUrl)}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" title="video"></iframe></div></div>`;
             } else {
-                preview = '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px">Nenhum video selecionado</div>';
+                preview = '<div style="text-align:center;padding:2rem;color:#999;background:#f5f5f5;border-radius:8px">Nenhum vídeo selecionado</div>';
             }
             break;
         }
@@ -226,9 +303,9 @@ export function elementHtml(el) {
                 const req = f.required ? ' <span style="color:#ef4444">*</span>' : '';
                 fhtml += `<div style="margin-bottom:${fsp}px"><label style="display:block;margin-bottom:4px;font-size:13px;font-weight:500;color:#374151">${escHtml(f.label||'')}${req}</label>`;
                 if (f.type === 'textarea') {
-                    fhtml += `<div style="width:100%;min-height:50px;padding:8px;border:1px solid #d1d5db;border-radius:${fbr}px;background:#f9fafb;font-size:12px;color:#9ca3af">Textarea</div>`;
+                    fhtml += `<div style="width:100%;min-height:50px;padding:8px;border:1px solid #d1d5db;border-radius:${fbr}px;background:#f9fafb;font-size:12px;color:#9ca3af">Texto longo</div>`;
                 } else if (f.type === 'select') {
-                    fhtml += `<div style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:${fbr}px;background:#fff;font-size:12px;color:#9ca3af;display:flex;justify-content:space-between"><span>Select...</span><span>&#9660;</span></div>`;
+                    fhtml += `<div style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:${fbr}px;background:#fff;font-size:12px;color:#9ca3af;display:flex;justify-content:space-between"><span>Selecione...</span><span>&#9660;</span></div>`;
                 } else if (f.type === 'checkbox' || f.type === 'radio') {
                     fhtml += `<div style="display:flex;align-items:center;gap:6px"><input type="${f.type}" disabled style="width:auto"><span style="font-size:12px;color:#374151">${escHtml(f.label||'')}</span></div>`;
                 } else {
@@ -236,7 +313,7 @@ export function elementHtml(el) {
                 }
                 fhtml += '</div>';
             });
-            const btnLabel = escHtml(s.button_text || 'Send');
+            const btnLabel = escHtml(s.button_text || 'Enviar');
             fhtml += `<button type="button" style="padding:10px 24px;background:${bc};color:${btc};border:none;border-radius:${fbr}px;font-size:13px;font-weight:500;cursor:default;${bw}">${btnLabel}</button>`;
             preview = fhtml;
             break;
@@ -251,7 +328,7 @@ export function elementHtml(el) {
             let tbody = '';
             tabs.forEach((t, i) => {
                 const active = i === ati;
-                thead += `<button type="button" style="padding:8px 16px;font-size:13px;border:none;border-bottom:3px solid ${active?tc:'transparent'};margin-bottom:-2px;background:${active?'#fff':'transparent'};color:${active?tc:'#6b7280'};font-weight:${active?'600':'400'};cursor:default">${escHtml(t.title||'Tab '+(i+1))}</button>`;
+                thead += `<button type="button" style="padding:8px 16px;font-size:13px;border:none;border-bottom:3px solid ${active?tc:'transparent'};margin-bottom:-2px;background:${active?'#fff':'transparent'};color:${active?tc:'#6b7280'};font-weight:${active?'600':'400'};cursor:default">${escHtml(t.title||'Aba '+(i+1))}</button>`;
                 tbody += `<div style="display:${active?'block':'none'};padding:16px;font-size:13px;color:#6b7280">${t.content?escHtml(String(t.content).substring(0,100)):'...'}</div>`;
             });
             thead += '</div>';
@@ -267,7 +344,7 @@ export function elementHtml(el) {
             items.forEach((item, i) => {
                 const isOpen = item.open;
                 ahtml += `<div style="border:1px solid ${ab};border-radius:8px;overflow:hidden;margin-bottom:2px">`;
-                ahtml += `<div style="display:flex;align-items:center;padding:10px 14px;font-size:13px;font-weight:500;background:${isOpen?ac:'#f9fafb'};color:${isOpen?'#fff':'#374151'}"><span style="display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);margin-right:8px;font-size:10px">&#9654;</span>${escHtml(item.title||'Section '+(i+1))}</div>`;
+                ahtml += `<div style="display:flex;align-items:center;padding:10px 14px;font-size:13px;font-weight:500;background:${isOpen?ac:'#f9fafb'};color:${isOpen?'#fff':'#374151'}"><span style="display:inline-block;transform:rotate(${isOpen?'90':'0'}deg);margin-right:8px;font-size:10px">&#9654;</span>${escHtml(item.title||'Seção '+(i+1))}</div>`;
                 if (isOpen) ahtml += `<div style="padding:12px;font-size:12px;color:#6b7280;background:#fff">${item.content?escHtml(String(item.content).substring(0,80)):'...'}</div>`;
                 ahtml += '</div>';
             });
@@ -354,11 +431,10 @@ export function elementHtml(el) {
                 shapeBottomHtml = `<div style="position:absolute;bottom:0;left:0;width:100%;height:${bottomHeight}px;z-index:1;"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="position:absolute;bottom:0;left:0;width:100%;height:100%;"><path d="${shapePaths[bottomType]}" style="fill:${bottomColor};"></path></svg></div>`;
             }
 
-            preview = `<div class="pb-section-editor" style="${secStyle}">${videoHtml}${overlayHtml}${shapeTopHtml}<div class="pb-section-header">Section</div><div class="pb-section-content" style="${innerStyle}"></div>${shapeBottomHtml}</div>`;
+            preview = `<div class="pb-section-editor" style="${secStyle}">${videoHtml}${overlayHtml}${shapeTopHtml}<div class="pb-section-header">Seção</div><div class="pb-section-content" style="${innerStyle}"></div>${shapeBottomHtml}</div>`;
             break;
         }
         case 'column': {
-            const colWidth = s.column_width || 'col-4';
             const vAlign = s.vertical_alignment || 'stretch';
             const cPos = s.content_position || 'top';
             const tAlign = s.text_align || '';
@@ -369,38 +445,26 @@ export function elementHtml(el) {
             const cpl = s.padding_left || '10px';
             const cm = s.margin || '0px';
             const cbr = s.border_radius || '0px';
-            const colClassMap = { 'col-1': 8.33, 'col-2': 16.67, 'col-3': 25, 'col-4': 33.33, 'col-5': 41.67, 'col-6': 50, 'col-7': 58.33, 'col-8': 66.67, 'col-9': 75, 'col-10': 83.33, 'col-11': 91.67, 'col-12': 100 };
             let colStyle = `padding:${cpt} ${cpr} ${cpb} ${cpl};border-radius:${cbr};display:flex;flex-direction:column;align-self:${vAlign};justify-content:${cPos};`;
             if (tAlign) colStyle += `text-align:${tAlign};`;
             if (cm) colStyle += `margin:${cm};`;
             if (cBg && cBg !== 'transparent') colStyle += `background-color:${cBg};`;
-            let pct;
-            if (typeof colWidth === 'number') {
-                pct = Math.max(1, Math.min(100, colWidth));
-            } else if (typeof colWidth === 'string' && colClassMap[colWidth]) {
-                pct = colClassMap[colWidth];
-            } else if (typeof colWidth === 'string' && !colWidth.startsWith('col-') && !isNaN(parseInt(colWidth))) {
-                pct = Math.max(1, Math.min(100, parseInt(colWidth) || 33));
-            } else {
-                pct = 33;
-            }
-            colStyle += `width:${pct}%;flex:0 0 ${pct}%;max-width:${pct}%;`;
-            preview = `<div class="pb-column-editor" style="${colStyle}"><div class="pb-column-header">Column</div><div class="pb-column-content"></div></div>`;
+            // Width lives on the .pb-el wrapper (see renderCanvas); the inner box fills it
+            colStyle += 'width:100%;height:100%;box-sizing:border-box;';
+            preview = `<div class="pb-column-editor" style="${colStyle}"><div class="pb-column-header">Coluna</div><div class="pb-column-content"></div></div>`;
             break;
         }
         case 'inner_section': {
             const cols = parseInt(s.columns) || 2;
-            const gap = s.column_gap || '20px';
-            const dir = s.column_direction || 'row';
             const iBg = s.background_color || 'transparent';
             const ipt = s.padding_top || '0px';
             const ipr = s.padding_right || '0px';
             const ipb = s.padding_bottom || '0px';
             const ipl = s.padding_left || '0px';
             const ibr = s.border_radius || '0px';
-            let isStyle = `display:flex;flex-direction:${dir};gap:${gap};padding:${ipt} ${ipr} ${ipb} ${ipl};min-height:60px;border:1px dashed rgba(99,102,241,.3);border-radius:4px;position:relative;`;
+            let isStyle = `padding:${ipt} ${ipr} ${ipb} ${ipl};min-height:60px;border:1px dashed rgba(99,102,241,.3);border-radius:4px;position:relative;`;
             if (iBg && iBg !== 'transparent') isStyle += `background-color:${iBg};`;
-            preview = `<div class="pb-inner-section-editor" style="${isStyle}"><div style="position:absolute;top:2px;left:4px;font-size:.55rem;color:var(--pb-text2);text-transform:uppercase;letter-spacing:.5px;">Inner Section (${cols} cols)</div></div>`;
+            preview = `<div class="pb-inner-section-editor" style="${isStyle}"><div style="position:absolute;top:2px;left:4px;font-size:.55rem;color:var(--pb-text2);text-transform:uppercase;letter-spacing:.5px;">Seção Interna (${cols} colunas)</div></div>`;
             break;
         }
         case 'counter': {
@@ -452,7 +516,7 @@ export function elementHtml(el) {
             const pos = s.icon_position || 'left';
             const al = s.alignment || 'left';
             const dir = pos === 'top' ? 'flex-direction:column;align-items:center;text-align:center' : 'flex-direction:row;align-items:flex-start';
-            preview = `<div style="display:flex;gap:16px;${dir};text-align:${al}"><div style="font-size:${isz}px;color:${icc};flex-shrink:0;line-height:1"><i class="${ic}"></i></div><div><div style="font-size:1.1em;font-weight:600;color:${tc};margin-bottom:4px">${escHtml(s.title || 'Icon Box Title')}</div><div style="font-size:.9em;color:${dc};line-height:1.5">${escHtml(s.description || 'Description text goes here')}</div></div></div>`;
+            preview = `<div style="display:flex;gap:16px;${dir};text-align:${al}"><div style="font-size:${isz}px;color:${icc};flex-shrink:0;line-height:1"><i class="${ic}"></i></div><div><div style="font-size:1.1em;font-weight:600;color:${tc};margin-bottom:4px">${escHtml(s.title || 'Título da caixa')}</div><div style="font-size:.9em;color:${dc};line-height:1.5">${escHtml(s.description || 'Escreva a descrição aqui')}</div></div></div>`;
             break;
         }
         case 'image_box': {
@@ -465,8 +529,8 @@ export function elementHtml(el) {
             const iw = s.image_width || '100%';
             let html = `<div style="text-align:${al}">`;
             if (img) html += `<img src="${escHtml(img)}" alt="${escHtml(s.image?.alt||'')}" style="width:${iw};border-radius:${br};margin-bottom:8px">`;
-            html += `<${tag} style="font-size:1.1em;font-weight:600;color:${tc};margin-bottom:4px">${escHtml(s.title || 'Image Box')}</${tag}>`;
-            html += `<div style="font-size:.9em;color:${dc};line-height:1.5">${escHtml(s.description || 'Description text')}</div></div>`;
+            html += `<${tag} style="font-size:1.1em;font-weight:600;color:${tc};margin-bottom:4px">${escHtml(s.title || 'Caixa com Imagem')}</${tag}>`;
+            html += `<div style="font-size:.9em;color:${dc};line-height:1.5">${escHtml(s.description || 'Texto de descrição')}</div></div>`;
             preview = html;
             break;
         }
@@ -477,7 +541,7 @@ export function elementHtml(el) {
             let stars = '';
             for (let i = 0; i < 5; i++) stars += i < rating ? '&#9733;' : '&#9734;';
             const avatar = s.avatar && s.avatar.url ? `<img src="${escHtml(s.avatar.url)}" style="width:50px;height:50px;border-radius:50%;object-fit:cover">` : `<div style="width:50px;height:50px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#999">&#128100;</div>`;
-            preview = `<div style="text-align:center;padding:16px;max-width:500px;margin:0 auto"><div style="color:#f59e0b;font-size:1.1em;margin-bottom:8px">${stars}</div><div style="color:${tc};font-style:italic;margin-bottom:12px;line-height:1.6">&ldquo;${escHtml(s.content || 'Great testimonial content goes here.')}&rdquo;</div><div style="display:flex;align-items:center;justify-content:center;gap:10px">${avatar}<div><div style="font-weight:600;color:${nc};font-size:.9em">${escHtml(s.name || 'Name')}</div><div style="font-size:.75em;color:#999">${escHtml((s.position||'')+(s.company?', '+s.company:''))}</div></div></div></div>`;
+            preview = `<div style="text-align:center;padding:16px;max-width:500px;margin:0 auto"><div style="color:#f59e0b;font-size:1.1em;margin-bottom:8px">${stars}</div><div style="color:${tc};font-style:italic;margin-bottom:12px;line-height:1.6">&ldquo;${escHtml(s.content || 'Escreva aqui o depoimento.')}&rdquo;</div><div style="display:flex;align-items:center;justify-content:center;gap:10px">${avatar}<div><div style="font-weight:600;color:${nc};font-size:.9em">${escHtml(s.name || 'Nome')}</div><div style="font-size:.75em;color:#999">${escHtml((s.position||'')+(s.company?', '+s.company:''))}</div></div></div></div>`;
             break;
         }
         case 'price_table': {
@@ -487,7 +551,7 @@ export function elementHtml(el) {
             const border = isFeat ? `border:2px solid ${fc};transform:scale(1.03)` : 'border:1px solid #e2e8f0';
             let html = `<div style="border-radius:12px;${border};padding:24px;text-align:center;max-width:320px;margin:0 auto;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.06)">`;
             if (isFeat) html += `<div style="background:${fc};color:#fff;padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:600;display:inline-block;margin-bottom:8px">POPULAR</div>`;
-            html += `<div style="font-size:1.1em;font-weight:600;margin-bottom:8px">${escHtml(s.title || 'Plan')}</div>`;
+            html += `<div style="font-size:1.1em;font-weight:600;margin-bottom:8px">${escHtml(s.title || 'Plano')}</div>`;
             html += `<div style="font-size:2em;font-weight:700;color:${fc}">${escHtml(s.currency||'R$')}${escHtml(s.price||'29')}</div>`;
             if (s.period) html += `<div style="font-size:.8em;color:#999;margin-bottom:16px">${escHtml(s.period)}</div>`;
             html += '<ul style="list-style:none;padding:0;margin:16px 0;text-align:left">';
@@ -539,11 +603,11 @@ export function elementHtml(el) {
             const dir = s.layout === 'vertical' ? 'column' : 'row';
             let mhtml = `<div style="display:flex;flex-direction:${dir};gap:${s.item_spacing || 0}px;background:${s.background_color || '#fff'};padding:0">`;
             if (items.length === 0) {
-                mhtml += '<div style="padding:8px 16px;color:#999;font-size:12px">No menu items</div>';
+                mhtml += '<div style="padding:8px 16px;color:#999;font-size:12px">Nenhum item de menu</div>';
             } else {
                 items.forEach(item => {
                     const ic = item.icon ? `<i class="${item.icon}" style="margin-right:4px"></i>` : '';
-                    mhtml += `<a href="${item.link || '#'}" style="padding:${s.item_padding?.top||'12px'} ${s.item_padding?.right||'20px'} ${s.item_padding?.bottom||'12px'} ${s.item_padding?.left||'20px'};text-decoration:none;color:#333;font-size:13px;display:flex;align-items:center;gap:6px;border-radius:4px">${ic}${item.label || 'Menu Item'}</a>`;
+                    mhtml += `<a href="${item.link || '#'}" style="padding:${s.item_padding?.top||'12px'} ${s.item_padding?.right||'20px'} ${s.item_padding?.bottom||'12px'} ${s.item_padding?.left||'20px'};text-decoration:none;color:#333;font-size:13px;display:flex;align-items:center;gap:6px;border-radius:4px">${ic}${item.label || 'Item do menu'}</a>`;
                 });
             }
             mhtml += '</div>';
@@ -558,9 +622,9 @@ export function elementHtml(el) {
             }
             break;
         }
-        default: preview = `<div class="pb-el-placeholder">${el.type}</div>`;
+        default: preview = `<div class="pb-el-placeholder">${escHtml(widgetLabel(el.type))}</div>`;
     }
-    return `<div class="pb-el-drag" draggable="true" title="Arrastar para reordenar">&#10023;</div><div class="pb-el-toolbar"><span class="pb-el-name">${escHtml(name)}</span><span class="pb-el-type">${el.type}</span><span style="flex:1"></span><button class="pb-el-action" onclick="event.stopPropagation();editor.duplicateElement(${el.id})" title="Duplicate">&#128203;</button><button class="pb-el-action" onclick="event.stopPropagation();editor.deleteElement(${el.id})" title="Delete">&#128465;</button></div><div class="pb-el-content">${preview}</div>`;
+    return `<div class="pb-el-drag" title="Arrastar para reordenar">${icon('grip', 14)}</div><div class="pb-el-toolbar"><span class="pb-el-name">${escHtml(name)}</span><span class="pb-el-type">${escHtml(widgetLabel(el.type))}</span><span style="flex:1"></span><button class="pb-el-action" onclick="event.stopPropagation();editor.duplicateElement(${el.id})" title="Duplicar">${icon('copy', 14)}</button><button class="pb-el-action" onclick="event.stopPropagation();editor.deleteElement(${el.id})" title="Excluir">${icon('trash', 14)}</button></div><div class="pb-el-content">${preview}</div>`;
 }
 
 export function initCanvasFeatures() {
@@ -683,7 +747,7 @@ function initLightbox() {
             if (!url) return;
             const overlay = document.createElement('div');
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:999999;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:fadeIn .2s';
-            overlay.innerHTML = `<img src="${escHtml(url)}" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.5)"><button style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;backdrop-filter:blur(4px)">&times;</button>`;
+            overlay.innerHTML = `<img src="${escHtml(url)}" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.5)"><button style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;backdrop-filter:blur(4px)">${icon('x', 18)}</button>`;
             overlay.onclick = () => overlay.remove();
             document.body.appendChild(overlay);
         });
@@ -697,7 +761,7 @@ export function renderStructure(elements, parentUl) {
         const li = document.createElement('li');
         li.className = 'pb-structure-item';
         li.dataset.elId = el.id;
-        li.innerHTML = `<span class="si-icon">${structureIcon(el.type)}</span><span>${el.name || el.type}</span><span class="si-type">${el.type}</span>`;
+        li.innerHTML = `<span class="si-icon">${structureIcon(el.type)}</span><span>${escHtml(elementName(el))}</span><span class="si-type">${el.type}</span>`;
         li.onclick = (e) => { e.stopPropagation(); /* will be bound by editor */ };
         ul.appendChild(li);
         if (el.children && el.children.length > 0) {

@@ -6,10 +6,12 @@
         "build": "vite build",
         "dev": "vite",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
+        "@vitest/coverage-v8": "^4.1.10",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "jsdom": "^29.1.1",
@@ -19,6 +21,7 @@
         "vitest": "^4.1.10"
     },
     "dependencies": {
+        "lucide": "^0.469.0",
         "sortablejs": "^1.15.7"
     }
 }

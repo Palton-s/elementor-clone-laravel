@@ -119,8 +119,10 @@ class MegaMenuWidget extends BaseWidget
         }
 
         $listHtml = empty($itemsHtml) ? '' : "<ul style=\"display: flex; flex-direction: {$direction}; align-items: {$alignVal}; list-style: none; margin: 0; padding: 0; gap: {$itemSpacing}px;\">{$itemsHtml}</ul>";
+        // It is a container: elements dropped into it (logo, button, search...) sit next to the links
+        $children = $content['children'] ?? '';
 
-        return $hoverStyle . "<nav class=\"pb-mega-menu\" style=\"{$navStyle}\">{$listHtml}</nav>";
+        return $hoverStyle . "<nav class=\"pb-mega-menu\" style=\"{$navStyle}\">{$listHtml}{$children}</nav>";
     }
 
     public function renderEditor(array $settings, array $content = [], array $styles = []): string

@@ -22,6 +22,7 @@ Route::middleware(['web', 'auth'])->prefix('page-builder')->name('page-builder.'
     Route::put('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
     Route::post('projects/{project}/move', [ProjectController::class, 'move'])->name('projects.move');
+    Route::get('projects/{project}/export-zip', [ProjectController::class, 'exportZip'])->name('projects.export-zip');
 
     Route::resource('pages', PageController::class)->except(['show', 'edit']);
     Route::get('pages/{page}/editor', [PageController::class, 'edit'])->name('editor');
@@ -31,6 +32,7 @@ Route::middleware(['web', 'auth'])->prefix('page-builder')->name('page-builder.'
     Route::post('pages/{page}/unpublish', [PageController::class, 'unpublish'])->name('pages.unpublish');
     Route::post('pages/{page}/duplicate', [PageController::class, 'duplicate'])->name('pages.duplicate');
     Route::get('pages/{page}/export', [PageController::class, 'export'])->name('pages.export');
+    Route::get('pages/{page}/export-zip', [PageController::class, 'exportZip'])->name('pages.export-zip');
     Route::post('pages/import', [PageController::class, 'import'])->name('pages.import');
 
     Route::post('html-import', [HtmlImportController::class, 'import'])->name('html-import')->middleware('throttle:html-import');

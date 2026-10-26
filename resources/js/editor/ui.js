@@ -36,9 +36,22 @@ export function toggleFullscreen() {
 }
 
 export function setResponsive(mode) {
+    const changed = state.responsiveMode !== mode;
     state.responsiveMode = mode;
+    state.responsiveTab = mode;
     document.querySelectorAll('.pb-toolbar [data-mode]').forEach(b => b.classList.remove('active'));
     document.querySelector(`.pb-toolbar [data-mode="${mode}"]`).classList.add('active');
+    document.querySelectorAll('.pb-resp-tab').forEach(b => b.classList.toggle('active', b.dataset.device === mode));
+    if (changed) {
+        // Canvas and settings both show the values of the device being edited
+        if (state.renderCanvas && state._lastElements) {
+            state.renderCanvas(state._lastElements);
+            if (state.selectedId) document.querySelector(`.pb-el[data-el-id="${state.selectedId}"]`)?.classList.add('selected');
+        }
+        import('./controls.js').then(m => {
+            if (state.cachedElementId) { m.refreshDeviceView(); m.renderControls(); }
+        });
+    }
     const canvas = document.getElementById('canvas');
     const frame = document.getElementById('device-frame');
     const notch = document.getElementById('device-notch');
@@ -63,11 +76,6 @@ export function setResponsive(mode) {
 }
 
 export function setResponsiveTab(device) {
-    state.responsiveTab = device;
-    document.querySelectorAll('.pb-resp-tab').forEach(b => b.classList.remove('active'));
-    const btn = document.querySelector(`.pb-resp-tab[data-device="${device}"]`);
-    if (btn) btn.classList.add('active');
-    import('./controls.js').then(m => { if (state.cachedElementId) m.renderControls(); });
     setResponsive(device);
 }
 

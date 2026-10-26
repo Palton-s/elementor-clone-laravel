@@ -21,7 +21,7 @@ class CollaborationController extends Controller
         $this->collaboration->userEditingPage($page, $request->user());
 
         return response()->json([
-            'message' => 'Joined collaboration',
+            'message' => 'Você entrou na edição colaborativa',
             'color' => $this->collaboration->getActiveUsers($page),
         ]);
     }
@@ -31,7 +31,7 @@ class CollaborationController extends Controller
         $this->authorize('view', $page);
         $this->collaboration->userLeftPage($page, $request->user());
 
-        return response()->json(['message' => 'Left collaboration']);
+        return response()->json(['message' => 'Você saiu da edição colaborativa']);
     }
 
     public function heartbeat(Request $request, Page $page): JsonResponse
@@ -62,12 +62,12 @@ class CollaborationController extends Controller
         if (!$locked) {
             $lock = $this->collaboration->getElementLock($page, $elementId);
             return response()->json([
-                'message' => 'Element is being edited by another user',
+                'message' => 'Este elemento está sendo editado por outra pessoa',
                 'locked_by' => $lock['name'] ?? 'Unknown',
             ], 409);
         }
 
-        return response()->json(['message' => 'Element locked']);
+        return response()->json(['message' => 'Elemento bloqueado para edição']);
     }
 
     public function unlockElement(Request $request, Page $page, int $elementId): JsonResponse
@@ -76,6 +76,6 @@ class CollaborationController extends Controller
         abort_unless(Element::where('id', $elementId)->where('page_id', $page->id)->exists(), 404);
         $this->collaboration->unlockElement($page, $elementId, $request->user());
 
-        return response()->json(['message' => 'Element unlocked']);
+        return response()->json(['message' => 'Elemento liberado']);
     }
 }

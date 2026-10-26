@@ -113,11 +113,11 @@ class PopupController extends Controller
 
             if ($redirectTo === 'editor') {
                 return redirect()->route('page-builder.popups.editor', $popup)
-                    ->with('success', "Popup \"{$popup->title}\" created!");
+                    ->with('success', "Popup \"{$popup->title}\" criado!");
             }
 
             return redirect()->route('page-builder.popups.index')
-                ->with('success', "Popup \"{$popup->title}\" created!");
+                ->with('success', "Popup \"{$popup->title}\" criado!");
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -143,7 +143,7 @@ class PopupController extends Controller
 
         $popup->update($validated);
 
-        if ($request->boolean('publish') || $validated['status'] === 'published') {
+        if ($request->boolean('publish') || ($validated['status'] ?? null) === 'published') {
             $popup->update([
                 'status' => 'published',
                 'published_at' => now(),
@@ -153,7 +153,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return redirect()->route('page-builder.popups.index')
-            ->with('success', "Popup \"{$popup->title}\" updated!");
+            ->with('success', "Popup \"{$popup->title}\" atualizado!");
     }
 
     public function destroy(Popup $popup): RedirectResponse
@@ -165,7 +165,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return redirect()->route('page-builder.popups.index')
-            ->with('success', "Popup \"{$title}\" deleted!");
+            ->with('success', "Popup \"{$title}\" excluído!");
     }
 
     public function editor(Popup $popup): View
@@ -173,7 +173,7 @@ class PopupController extends Controller
         $this->authorizeOwner($popup);
         $page = $popup->page;
         if (!$page) {
-            abort(404, 'Associated page not found');
+            abort(404, 'Página associada não encontrada');
         }
 
         $popupContext = [
@@ -213,7 +213,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return response()->json([
-            'message' => 'Triggers updated!',
+            'message' => 'Regras de exibição atualizadas!',
             'triggers' => $popup->fresh()->triggers,
         ]);
     }
@@ -249,7 +249,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return response()->json([
-            'message' => 'Conditions updated!',
+            'message' => 'Regras de exibição atualizadas!',
             'conditions' => $popup->fresh()->conditions,
         ]);
     }
@@ -265,7 +265,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return response()->json([
-            'message' => 'Popup published!',
+            'message' => 'Popup publicado!',
             'popup' => $popup->fresh(),
         ]);
     }
@@ -281,7 +281,7 @@ class PopupController extends Controller
         $this->popupService->clearCache();
 
         return response()->json([
-            'message' => 'Popup unpublished!',
+            'message' => 'Popup despublicado!',
             'popup' => $popup->fresh(),
         ]);
     }

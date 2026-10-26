@@ -40,7 +40,7 @@ class PagePolicy
             return false;
         }
 
-        return $page->user_id === $user->id;
+        return (int) $page->user_id === (int) $user->id;
     }
 
     public function delete(User $user, Page $page): bool
@@ -49,7 +49,7 @@ class PagePolicy
             return true;
         }
 
-        return $page->user_id === $user->id;
+        return (int) $page->user_id === (int) $user->id;
     }
 
     public function restore(User $user, Page $page): bool

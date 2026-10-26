@@ -60,7 +60,7 @@ class ElementController extends Controller
         ]);
 
         if (!$this->widgetManager->getWidget($validated['type'])) {
-            return response()->json(['error' => 'Widget type not found'], 422);
+            return response()->json(['error' => 'Tipo de widget não encontrado'], 422);
         }
 
         $parentId = $validated['parent_id'] ?? null;
@@ -84,7 +84,7 @@ class ElementController extends Controller
         );
 
         return response()->json([
-            'message' => 'Element added successfully',
+            'message' => 'Elemento adicionado',
             'element' => $element->load('children'),
         ], 201);
     }
@@ -117,7 +117,7 @@ class ElementController extends Controller
         $element = $this->pageBuilder->updateElement($element, $validated);
 
         return response()->json([
-            'message' => 'Element updated successfully',
+            'message' => 'Elemento atualizado',
             'element' => $element->load('children'),
         ]);
     }
@@ -128,7 +128,7 @@ class ElementController extends Controller
         $this->pageBuilder->removeElement($element);
 
         return response()->json([
-            'message' => 'Element deleted successfully',
+            'message' => 'Elemento excluído',
         ]);
     }
 
@@ -138,7 +138,7 @@ class ElementController extends Controller
         $newElement = $this->pageBuilder->duplicateElement($element);
 
         return response()->json([
-            'message' => 'Element duplicated successfully',
+            'message' => 'Elemento duplicado',
             'element' => $newElement->load('children'),
         ]);
     }
@@ -156,7 +156,7 @@ class ElementController extends Controller
         $this->applyOrder($order, $page->id, null);
 
         return response()->json([
-            'message' => 'Elements reordered successfully',
+            'message' => 'Ordem dos elementos atualizada',
         ]);
     }
 
@@ -199,12 +199,12 @@ class ElementController extends Controller
             $parent = Element::find($parentId);
             $parentWidget = $parent ? $this->widgetManager->getWidget($parent->type) : null;
             if (!$parentWidget || !$parentWidget->isContainer()) {
-                return response()->json(['error' => 'Parent element must be a container'], 422);
+                return response()->json(['error' => 'Só é possível colocar elementos dentro de seções, colunas e outros blocos'], 422);
             }
 
             $descendantIds = $this->getAllDescendantIds($element->id);
             if (in_array($parentId, $descendantIds)) {
-                return response()->json(['error' => 'Cannot move element into its own descendant'], 422);
+                return response()->json(['error' => 'Não é possível mover um elemento para dentro dele mesmo'], 422);
             }
         }
 
@@ -213,7 +213,7 @@ class ElementController extends Controller
         $element->save();
 
         return response()->json([
-            'message' => 'Element moved successfully',
+            'message' => 'Elemento movido',
             'element' => $element->fresh()->load('children'),
         ]);
     }
@@ -236,7 +236,15 @@ class ElementController extends Controller
             'settings' => 'required|array',
             'content' => 'sometimes|array',
             'styles' => 'sometimes|array',
+            'device' => 'nullable|in:desktop,tablet,mobile',
         ]);
+
+        $device = $validated['device'] ?? 'desktop';
+        if ($device !== 'desktop') {
+            $this->storeDeviceOverrides($element, $device, 'settings', $this->pageBuilder->sanitizeSettings($validated['settings']));
+
+            return response()->json(['message' => 'Configurações do elemento atualizadas', 'element' => $element->fresh()]);
+        }
 
         $element->settings = array_merge(
             $element->settings ?? [],
@@ -255,7 +263,7 @@ class ElementController extends Controller
         $element->page->touch();
 
         return response()->json([
-            'message' => 'Element settings updated successfully',
+            'message' => 'Configurações do elemento atualizadas',
             'element' => $element->fresh(),
         ]);
     }
@@ -265,7 +273,15 @@ class ElementController extends Controller
         $this->authorize('update', $element->page);
         $validated = $request->validate([
             'styles' => 'required|array',
+            'device' => 'nullable|in:desktop,tablet,mobile',
         ]);
+
+        $device = $validated['device'] ?? 'desktop';
+        if ($device !== 'desktop') {
+            $this->storeDeviceOverrides($element, $device, 'styles', $this->pageBuilder->sanitizeStyles($validated['styles']));
+
+            return response()->json(['message' => 'Estilos do elemento atualizados', 'element' => $element->fresh()]);
+        }
 
         $element->styles = array_merge(
             $element->styles ?? [],
@@ -275,14 +291,48 @@ class ElementController extends Controller
         $element->page->touch();
 
         return response()->json([
-            'message' => 'Element styles updated successfully',
+            'message' => 'Estilos do elemento atualizados',
             'element' => $element->fresh(),
         ]);
     }
 
-    public function renderElement(Element $element): JsonResponse
+    /**
+     * Saves tablet/mobile overrides in responsive_settings; a null value removes the override
+     * so the device inherits again (mobile -> tablet -> desktop).
+     */
+    private function storeDeviceOverrides(Element $element, string $device, string $bucket, array $values): void
+    {
+        $responsive = $element->responsive_settings ?? [];
+        $current = $responsive[$device][$bucket] ?? [];
+
+        foreach ($values as $key => $value) {
+            if ($value === null) {
+                unset($current[$key]);
+                // Also drop a value saved by the old "<key>_<device>" scheme, otherwise it would come back
+                $legacy = $key . '_' . $device;
+                foreach (['settings', 'styles'] as $b) {
+                    $data = $element->{$b} ?? [];
+                    if (array_key_exists($legacy, $data)) {
+                        unset($data[$legacy]);
+                        $element->{$b} = $data;
+                    }
+                }
+            } else {
+                $current[$key] = $value;
+            }
+        }
+
+        $responsive[$device][$bucket] = $current;
+        $element->responsive_settings = $responsive;
+        $element->save();
+        $element->page->touch();
+    }
+
+    public function renderElement(Request $request, Element $element): JsonResponse
     {
         $this->authorize('view', $element->page);
+        $device = in_array($request->query('device'), ['tablet', 'mobile'], true) ? $request->query('device') : 'desktop';
+        [$deviceSettings, $deviceStyles] = $element->valuesForDevice($device);
         $widget = $this->widgetManager->getWidget($element->type);
 
         if (!$widget) {
@@ -293,14 +343,14 @@ class ElementController extends Controller
             $childrenHtml = '';
             if ($element->children->isNotEmpty()) {
                 foreach ($element->children as $child) {
-                    $childrenHtml .= $this->renderer->renderSingleElement($child);
+                    $childrenHtml .= $this->renderer->renderSingleElement($child, $device);
                 }
             }
 
             $innerHtml = $widget->renderEditor(
-                array_merge($element->settings ?? [], $element->styles ?? []),
+                array_merge($deviceSettings, $deviceStyles),
                 array_merge($element->content ?? [], ['children' => $childrenHtml]),
-                $element->styles ?? []
+                $deviceStyles
             );
         } catch (\Throwable $e) {
             $innerHtml = '<!-- Render error: ' . htmlspecialchars($e->getMessage()) . ' -->';
@@ -318,7 +368,7 @@ class ElementController extends Controller
         $widgetControls = $this->renderer->getWidgetControls($element->type);
 
         if (!$widgetControls) {
-            return response()->json(['error' => 'Widget not found'], 404);
+            return response()->json(['error' => 'Widget não encontrado'], 404);
         }
 
         return response()->json([
@@ -332,7 +382,7 @@ class ElementController extends Controller
         $widgetControls = $this->renderer->getWidgetControls($type);
 
         if (!$widgetControls) {
-            return response()->json(['error' => 'Widget not found'], 404);
+            return response()->json(['error' => 'Widget não encontrado'], 404);
         }
 
         return response()->json($widgetControls);
@@ -446,12 +496,12 @@ class ElementController extends Controller
             $elements = $page->allElements()->get();
 
             return response()->json([
-                'message' => 'Snapshot restored successfully',
+                'message' => 'Versão restaurada',
                 'elements' => $this->elementManager->buildTree($elements),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to restore snapshot: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Falha ao restaurar a versão: ' . $e->getMessage()], 500);
         }
     }
 

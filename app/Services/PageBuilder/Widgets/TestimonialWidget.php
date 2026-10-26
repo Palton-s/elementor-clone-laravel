@@ -13,10 +13,10 @@ class TestimonialWidget extends BaseWidget
         $this->keywords = ['testimonial', 'review', 'quote', 'feedback'];
 
         $this->defaultSettings = [
-            'content' => 'This product has completely transformed our workflow. The team is incredibly responsive and the features are exactly what we needed.',
+            'content' => 'Este produto transformou completamente a nossa rotina. A equipe é muito atenciosa e os recursos são exatamente o que precisávamos.',
             'name' => 'Maria Silva',
             'position' => 'CEO',
-            'company' => 'TechCorp',
+            'company' => 'Empresa',
             'avatar' => [],
             'rating' => 5,
             'alignment' => 'center',

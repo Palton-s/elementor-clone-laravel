@@ -1,5 +1,6 @@
 import state from './state.js';
 import { escHtml, apiFetch, showToast, toastSuccess, toastError } from './utils.js';
+import { icon } from './icons.js';
 
 export function save(silent) {
     if (state.saving) return;
@@ -20,16 +21,16 @@ export function save(silent) {
         state.saving = false;
         state.dirty = false;
         if (overlay) overlay.remove();
-        if (!silent) toastSuccess('Pagina salva!');
+        if (!silent) toastSuccess('Página salva!');
     })
     .catch(() => { state.saving = false; if (overlay) overlay.remove(); toastError('Falha ao salvar'); });
 }
 
 export function publish() {
-    if (!confirm('Publicar esta pagina?')) return;
+    if (!confirm('Publicar esta página?')) return;
     apiFetch(`/page-builder/pages/${state.pageId}/publish`, { method: 'POST', headers: { 'X-CSRF-TOKEN': state.csrf } })
-        .then(() => { toastSuccess('Pagina publicada!'); setTimeout(() => location.reload(), 500); })
-        .catch(() => toastError('Falha ao publicar pagina'));
+        .then(() => { toastSuccess('Página publicada!'); setTimeout(() => location.reload(), 500); })
+        .catch(() => toastError('Falha ao publicar página'));
 }
 
 export function autoSave() {
@@ -137,10 +138,10 @@ export function loadTemplates() {
             const container = document.getElementById('layout-templates');
             container.innerHTML = '<div class="pb-widget-group-title" style="margin-bottom:.75rem">Escolha um modelo de layout</div>';
             for (const [key, tmpl] of Object.entries(data.templates)) {
-                const previews = { blank: '&#9635;', landing: '&#127968;', about: '&#128100;', contact: '&#128222;', showcase: '&#127912;' };
+                const previews = { blank: 'square-dashed', landing: 'layout-template', about: 'user', contact: 'mail', showcase: 'palette' };
                 const card = document.createElement('div');
                 card.className = 'pb-layout-card';
-                card.innerHTML = `<div class="pb-layout-card-preview">${previews[key] || '&#9635;'}</div><div class="pb-layout-card-info"><h4>${tmpl.name}</h4><p>${tmpl.description}</p></div><button class="pb-apply-btn" data-template="${key}">Aplicar Modelo</button>`;
+                card.innerHTML = `<div class="pb-layout-card-preview">${icon(previews[key] || 'square-dashed', 32)}</div><div class="pb-layout-card-info"><h4>${tmpl.name}</h4><p>${tmpl.description}</p></div><button class="pb-apply-btn" data-template="${key}">Aplicar Modelo</button>`;
                 card.querySelector('.pb-apply-btn').onclick = (e) => {
                     e.stopPropagation();
                     applyTemplate(key, e.target);
@@ -152,7 +153,7 @@ export function loadTemplates() {
 }
 
 function applyTemplate(key, btn) {
-    if (!confirm('Aplicar este modelo? Ira substituir todo o conteudo existente.')) return;
+    if (!confirm('Aplicar este modelo? Ele vai substituir todo o conteúdo atual da página.')) return;
     btn.disabled = true; btn.textContent = 'Aplicando...';
     apiFetch(`/page-builder/pages/${state.pageId}/apply-template`, {
         method: 'POST',
@@ -172,8 +173,7 @@ export function saveAsGlobalWidget() {
     if (!id) { showToast('Selecione um elemento primeiro', 'error'); return; }
     const name = prompt('Nome do Global Widget:');
     if (!name) return;
-    apiFetch('/page-builder/elements/' + id)
-        .then(r => r.json())
+    return apiFetch('/page-builder/elements/' + id)
         .then(data => {
             const el = data.element;
             return apiFetch('/page-builder/global-widgets', {
@@ -195,12 +195,12 @@ export function saveAsGlobalWidget() {
 }
 
 export function insertGlobalWidget() {
-    apiFetch('/page-builder/global-widgets')
-        .then(r => r.json())
+    // apiFetch already resolves to the parsed JSON body
+    return apiFetch('/page-builder/global-widgets')
         .then(data => {
             const widgets = data.global_widgets || [];
             if (widgets.length === 0) {
-                showToast('Nenhum global widget disponivel', 'error');
+                showToast('Nenhum global widget disponível', 'error');
                 return;
             }
             const overlay = document.createElement('div');
@@ -209,21 +209,30 @@ export function insertGlobalWidget() {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>Inserir Global Widget</h3>
-                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">${icon('x', 18)}</button>
                     </div>
                     <div class="modal-body" style="max-height:400px;overflow-y:auto">
                         ${widgets.map(w => `
-                            <div class="gw-item" data-id="${w.id}" style="padding:.75rem;border:1px solid var(--pb-border);border-radius:8px;margin-bottom:.5rem;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.75rem" onmouseenter="this.style.background='var(--pb-surface2)'" onmouseleave="this.style.background=''" onclick="this.closest('.modal-overlay').remove(); window._insertGlobalWidget(${w.id}, '${w.type}', ${JSON.stringify(w.settings || {})}, ${JSON.stringify(w.content || {})}, ${JSON.stringify(w.styles || {})})">
-                                <span style="font-size:1.2rem">🔧</span>
+                            <div class="gw-item" data-id="${Number(w.id)}" style="padding:.75rem;border:1px solid var(--pb-border);border-radius:8px;margin-bottom:.5rem;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.75rem" onmouseenter="this.style.background='var(--pb-surface2)'" onmouseleave="this.style.background=''">
+                                <span style="display:flex;opacity:.7">${icon('component', 18)}</span>
                                 <div>
                                     <div style="font-weight:600;font-size:.85rem;color:var(--pb-text)">${escHtml(w.title)}</div>
-                                    <div style="font-size:.72rem;color:var(--pb-text2)">${w.type} ${w.status === 'published' ? '✅' : '📝'}</div>
+                                    <div style="font-size:.72rem;color:var(--pb-text2)">${escHtml(w.type)} · ${w.status === 'published' ? 'publicado' : 'rascunho'}</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
+            // Data is looked up by id instead of being serialized into an onclick attribute
+            // (JSON quotes used to close the attribute, so the click never worked)
+            overlay.querySelectorAll('.gw-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const w = widgets.find(x => Number(x.id) === Number(item.dataset.id));
+                    overlay.remove();
+                    if (w) _insertGlobalWidget(w.id, w.type, { ...(w.settings || {}) }, w.content || {}, w.styles || {});
+                });
+            });
             document.body.appendChild(overlay);
         })
         .catch(err => { console.error(err); showToast('Erro ao carregar global widgets', 'error'); });
@@ -236,7 +245,7 @@ export function _insertGlobalWidget(id, type, settings, content, styles) {
         parentId = parseInt(section.dataset.elId);
     }
     settings._global_widget_id = id;
-    apiFetch('/page-builder/pages/' + state.pageId + '/elements', {
+    return apiFetch('/page-builder/pages/' + state.pageId + '/elements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': state.csrf },
         body: JSON.stringify({
@@ -268,7 +277,6 @@ export function syncGlobalWidgets() {
     ids.forEach(elId => {
         promises.push(
             apiFetch('/page-builder/elements/' + elId)
-                .then(r => r.json())
                 .then(data => {
                     const element = data.element;
                     if (element && element.settings && element.settings._global_widget_id) {

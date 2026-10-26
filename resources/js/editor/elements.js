@@ -1,9 +1,10 @@
 import state from './state.js';
-import { structureIcon, apiFetch, showToast, toastError } from './utils.js';
+import { structureIcon, apiFetch, showToast, toastError, escHtml } from './utils.js';
+import { widgetLabel, elementName } from './i18n.js';
 import { renderCanvas, renderMath } from './canvas.js';
 import { pushHistory } from './history.js';
 import { refreshSortables } from './dragdrop.js';
-import { renderNavigator as renderNav } from './navigator.js';
+import { renderNavigator as renderNav, highlightNavItem } from './navigator.js';
 import { loadControls } from './controls.js';
 import { removeMultiToolbar, refreshMultiSelect } from './multi-select.js';
 
@@ -14,7 +15,7 @@ export function renderStructureWithSelect(elements, parentUl) {
         const li = document.createElement('li');
         li.className = 'pb-structure-item' + (state.selectedId === el.id ? ' active' : '');
         li.dataset.elId = el.id;
-        li.innerHTML = `<span class="si-icon">${structureIcon(el.type)}</span><span>${el.name || el.type}</span><span class="si-type">${el.type}</span>`;
+        li.innerHTML = `<span class="si-icon">${structureIcon(el.type)}</span><span>${escHtml(elementName(el))}</span><span class="si-type">${escHtml(widgetLabel(el.type))}</span>`;
         li.onclick = (e) => { e.stopPropagation(); selectElement(el.id); };
         ul.appendChild(li);
         if (el.children && el.children.length > 0) {
@@ -48,12 +49,13 @@ export function selectElement(id, ctrlKey) {
     if (el) el.classList.add('selected');
     const si = document.querySelector(`.pb-structure-item[data-el-id="${id}"]`);
     if (si) si.classList.add('active');
+    highlightNavItem(id);
     loadControls(id);
     removeMultiToolbar();
 }
 
 export function loadElements() {
-    apiFetch(`/page-builder/pages/${state.pageId}/elements`, {
+    return apiFetch(`/page-builder/pages/${state.pageId}/elements`, {
         headers: { 'X-CSRF-TOKEN': state.csrf },
     })
         .then(data => {
@@ -73,10 +75,10 @@ export function loadElements() {
 }
 
 export function loadPageData() {
-    showToast('Carregando dados da pagina...', 'info');
+    showToast('Carregando dados da página...', 'info');
     apiFetch(`/page-builder/pages/${state.pageId}/data`)
         .then(data => { window._pageData = data.page; })
-        .catch(() => toastError('Falha ao carregar dados da pagina'));
+        .catch(() => toastError('Falha ao carregar dados da página'));
 }
 
 export function deleteElement(id) {

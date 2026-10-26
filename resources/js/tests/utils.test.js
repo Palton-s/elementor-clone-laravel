@@ -16,15 +16,18 @@ describe('escHtml', () => {
 });
 
 describe('structureIcon', () => {
-    it('should return known icons', () => {
-        expect(structureIcon('section')).toBe('&#9638;');
-        expect(structureIcon('heading')).toBe('H');
-        expect(structureIcon('text')).toBe('T');
-        expect(structureIcon('image')).toBe('&#128247;');
-        expect(structureIcon('button')).toBe('&#128206;');
+    it('should return an svg icon for known types', () => {
+        for (const type of ['section', 'column', 'heading', 'text', 'image', 'button']) {
+            const svg = structureIcon(type);
+            expect(svg.startsWith('<svg')).toBe(true);
+            expect(svg).toContain('class="pb-icon');
+        }
+        expect(structureIcon('section')).not.toBe(structureIcon('heading'));
     });
 
-    it('should return default icon for unknown type', () => {
-        expect(structureIcon('unknown')).toBe('&#9679;');
+    it('should return a fallback icon for unknown type', () => {
+        const svg = structureIcon('unknown');
+        expect(svg.startsWith('<svg')).toBe(true);
+        expect(svg).not.toBe(structureIcon('section'));
     });
 });

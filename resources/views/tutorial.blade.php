@@ -63,7 +63,7 @@
                 </table>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Passo 1: Clonar o repositório</h3>
-                <pre style="background:#1e1e2d;color:#a6e3a1;padding:1rem;border-radius:6px;font-size:.85rem;overflow-x:auto"><code>git clone https://github.com/seu-usuario/elementor-clone-laravel.git
+                <pre style="background:#1e1e2d;color:#a6e3a1;padding:1rem;border-radius:6px;font-size:.85rem;overflow-x:auto"><code>git clone https://github.com/seu-usuário/elementor-clone-laravel.git
 cd elementor-clone-laravel</code></pre>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Passo 2: Instalar dependências</h3>
@@ -158,7 +158,7 @@ php artisan serve</code></pre>
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Números do Projeto</h3>
                 <table class="widget-table">
                     <tr><th>Métrica</th><th>Valor</th></tr>
-                    <tr><td>Elementos disponíveis</td><td>30 (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Video, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</td></tr>
+                    <tr><td>Elementos disponíveis</td><td>30 (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Vídeo, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</td></tr>
                     <tr><td>Templates prontos</td><td>7 (Blank, Landing, About, Contact, Portfolio, Showcase Completo, Blog Post)</td></tr>
                     <tr><td>Rotas definidas</td><td>100+ (CRUD páginas, elementos, revisões, templates, temas, popups, widgets globais, fontes, colaboração, HTML import, dynamic tags, find & replace, API REST)</td></tr>
                     <tr><td>Testes automatizados</td><td>155 (61 unitários + 94 de feature)</td></tr>
@@ -173,7 +173,7 @@ php artisan serve</code></pre>
                 <ul>
                     <li>Criar páginas com título e status (rascunho / publicado)</li>
                     <li>Abrir um <strong>editor visual</strong> em tela cheia com tema escuro</li>
-                    <li>Arrastar <strong>30 elementos</strong> (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Video, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</li>
+                    <li>Arrastar <strong>30 elementos</strong> (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Vídeo, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</li>
                     <li>Selecionar qualquer elemento e editar suas <strong>configurações</strong> no painel direito</li>
                     <li><strong>Editor de texto rich-text (WYSIWYG)</strong> com toolbar: negrito, itálico, links, imagens, vídeos YouTube, listas, código fonte</li>
                     <li><strong>Inserir imagens</strong> no texto via upload ou colar (Ctrl+V) — imagem inline no conteúdo</li>
@@ -199,7 +199,7 @@ php artisan serve</code></pre>
                     <li><strong>Estilo por widget</strong> — 3 abas (Content, Style, Advanced): tipografia, fundo, borda, sombra, hover, dimensões, animação, CSS customizado, visibilidade responsiva</li>
                     <li><strong>Responsive Tabs</strong> — abas Desktop/Tablet/Mobile no painel de configurações com valores por breakpoint</li>
                     <li><strong>Gradient Background</strong> — gradientes lineares e radiais com editor visual de cores e ângulo</li>
-                    <li><strong>Parallax &amp; Video Background</strong> — efeito parallax no scroll e vídeos de fundo autoplay/mute/loop</li>
+                    <li><strong>Parallax &amp; Vídeo Background</strong> — efeito parallax no scroll e vídeos de fundo autoplay/mute/loop</li>
                     <li><strong>Shape Dividers</strong> — 10 tipos de divisores SVG (tilt, waves, mountains, clouds, triangles, drip, etc.)</li>
                     <li><strong>Background Overlay</strong> — cor overlay com blend modes e opacidade</li>
                     <li><strong>Scroll-Triggered Animations</strong> — fade, zoom, slide ativados no scroll (IntersectionObserver)</li>
@@ -246,7 +246,7 @@ php artisan serve</code></pre>
 │                  WIDGETS (30)                     │
 │   BaseWidget → Heading │ Text │ Image │ Button    │
 │              Section │ Column │ InnerSection       │
-│              Callout │ Table │ Math │ Video        │
+│              Callout │ Table │ Math │ Vídeo        │
 │              Divider │ Spacer │ Icon │ Gallery     │
 │              Form │ Tabs │ Accordion               │
 │              Counter │ ProgressBar │ SocialIcons   │
@@ -285,7 +285,7 @@ php artisan serve</code></pre>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">O que está incluído (gratuito)</h3>
                 <ul>
-                    <li>30 widgets (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Video, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</li>
+                    <li>30 widgets (Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Vídeo, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie)</li>
                     <li>Editor visual completo com drag-and-drop (SortableJS), undo/redo, zoom, fullscreen</li>
                     <li>7 templates prontos (Blank, Landing, About, Contact, Portfolio, Showcase, Blog Post)</li>
                     <li>Sistema de revisões com diff e restauração</li>
@@ -932,7 +932,7 @@ php artisan serve</code></pre>
                     <tr><td>Min Height</td><td>text</td><td>Altura mínima (ex: 400px)</td></tr>
                     <tr><td>Align Items</td><td>select</td><td>stretch, flex-start, center, flex-end</td></tr>
                     <tr><td>Justify Content</td><td>select</td><td>flex-start, center, flex-end, space-between, space-around, space-evenly</td></tr>
-                    <tr><td>Background Type</td><td>select</td><td>none, classic, gradient, video</td></tr>
+                    <tr><td>Background Type</td><td>select</td><td>none, classic, gradient, vídeo</td></tr>
                     <tr><td>Background Color</td><td>color</td><td>Cor de fundo</td></tr>
                     <tr><td>Padding Top</td><td>text</td><td>Espaçamento superior (ex: 80px)</td></tr>
                     <tr><td>Padding Bottom</td><td>text</td><td>Espaçamento inferior</td></tr>
@@ -1055,11 +1055,11 @@ php artisan serve</code></pre>
                     <tr><td><code>\leq, \geq, \neq</code></td><td>menor ou igual, maior ou igual, diferente</td></tr>
                 </table>
 
-                <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Video (Vídeo)</h3>
-                <p>Incorporar vídeos do YouTube e Vimeo com configuracoes de aspect ratio, autoplay, loop e mute.</p>
+                <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Vídeo (Vídeo)</h3>
+                <p>Incorporar vídeos do YouTube e Vimeo com configurações de aspect ratio, autoplay, loop e mute.</p>
                 <table class="widget-table">
                     <tr><th>Controle</th><th>Tipo</th><th>Opções</th></tr>
-                    <tr><td>Video URL</td><td>url</td><td>URL do YouTube ou Vimeo</td></tr>
+                    <tr><td>Vídeo URL</td><td>url</td><td>URL do YouTube ou Vimeo</td></tr>
                     <tr><td>Aspect Ratio</td><td>select</td><td>16:9, 4:3, 1:1, 21:9</td></tr>
                     <tr><td>Autoplay</td><td>boolean</td><td>Reproduzir automaticamente</td></tr>
                     <tr><td>Loop</td><td>boolean</td><td>Repetir vídeo</td></tr>
@@ -1069,7 +1069,7 @@ php artisan serve</code></pre>
                 </table>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Divider (Divisor)</h3>
-                <p>Linha horizontal com configuracoes de estilo, espessura, cor e espacamento.</p>
+                <p>Linha horizontal com configurações de estilo, espessura, cor e espaçamento.</p>
                 <table class="widget-table">
                     <tr><th>Controle</th><th>Tipo</th><th>Opções</th></tr>
                     <tr><td>Style</td><td>select</td><td>solid, dashed, dotted, double</td></tr>
@@ -1087,7 +1087,7 @@ php artisan serve</code></pre>
                 </table>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Icon (Ícone)</h3>
-                <p>Ícone Font Awesome com configuracoes de tamanho, cor e link.</p>
+                <p>Ícone Font Awesome com configurações de tamanho, cor e link.</p>
                 <table class="widget-table">
                     <tr><th>Controle</th><th>Tipo</th><th>Opções</th></tr>
                     <tr><td>Icon</td><td>icon picker</td><td>70+ ícones Font Awesome (fas/fab)</td></tr>
@@ -1653,7 +1653,7 @@ php artisan serve</code></pre>
                 <p>A versão redesenhada do <strong>Showcase Completo</strong> foi pensada para demonstrar, de forma simples, os principais recursos de <strong>links</strong>, <strong>vídeos</strong> e <strong>imagens</strong>:</p>
                 <ul>
                     <li><strong>Links:</strong> botões com âncoras da própria página (<code>#precos</code>, <code>#video</code>, <code>#contato</code>), imagens com link externo que abrem em nova aba (<em>target="_blank"</em>), títulos com link, botões das tabelas de preço e ícones de redes sociais — tudo configurado no campo <strong>Link</strong> de cada widget (aba Content).</li>
-                    <li><strong>Vídeos:</strong> um vídeo <strong>YouTube</strong> no Hero e um vídeo <strong>Vimeo</strong> na seção "Imagens com Links". Basta colar a URL no widget <strong>Vídeo</strong> (campo <em>Video URL</em>) — a prévia de incorporação (embed) é gerada automaticamente. Opções: autoplay, loop, controles, mudo, tempo de início/fim e proporção (16:9, 4:3, 1:1, 21:9).</li>
+                    <li><strong>Vídeos:</strong> um vídeo <strong>YouTube</strong> no Hero e um vídeo <strong>Vimeo</strong> na seção "Imagens com Links". Basta colar a URL no widget <strong>Vídeo</strong> (campo <em>Vídeo URL</em>) — a prévia de incorporação (embed) é gerada automaticamente. Opções: autoplay, loop, controles, mudo, tempo de início/fim e proporção (16:9, 4:3, 1:1, 21:9).</li>
                     <li><strong>Imagens:</strong>
                         <ul>
                             <li><strong>Lightbox:</strong> ative <em>Enable Lightbox</em> no widget Imagem para abrir a foto ampliada ao clicar (Hero de imagens com links);</li>
@@ -1696,7 +1696,7 @@ php artisan serve</code></pre>
                     </li>
                     <li><strong>Coluna direita</strong> (<code>col-6</code>, centralizada). Widget:
                         <ul>
-                            <li><strong>Vídeo:</strong> <strong>Video Type:</strong> <code>youtube</code>, <strong>Video URL:</strong> <code>https://www.youtube.com/watch?v=ScMzIvxBSi4</code>, <strong>Aspect Ratio:</strong> <code>16:9</code>, largura <code>100%</code>. (O campo correto é <em>Video URL</em>, não "URL" — sem ele o vídeo não aparece.)</li>
+                            <li><strong>Vídeo:</strong> <strong>Vídeo Type:</strong> <code>youtube</code>, <strong>Vídeo URL:</strong> <code>https://www.youtube.com/watch?v=ScMzIvxBSi4</code>, <strong>Aspect Ratio:</strong> <code>16:9</code>, largura <code>100%</code>. (O campo correto é <em>Vídeo URL</em>, não "URL" — sem ele o vídeo não aparece.)</li>
                         </ul>
                     </li>
                 </ol>
@@ -1779,7 +1779,7 @@ php artisan serve</code></pre>
                     <li><strong>Coluna direita <code>col-6</code>, widgets em ordem:</strong>
                         <ul>
                             <li><strong>Imagem</strong>: <strong>Link:</strong> <code>https://example.com</code>, <strong>Link Target:</strong> <code>_blank</code>, caption <code>"Abre em uma nova aba"</code>, hover <code>zoom</code>, radius <code>16px</code>. (Toda a imagem vira um link ao clicar.)</li>
-                            <li><strong>Vídeo Vimeo:</strong> <strong>Video Type:</strong> <code>vimeo</code>, <strong>Video URL:</strong> <code>https://vimeo.com/76979871</code>, largura <code>100%</code>.</li>
+                            <li><strong>Vídeo Vimeo:</strong> <strong>Vídeo Type:</strong> <code>vimeo</code>, <strong>Vídeo URL:</strong> <code>https://vimeo.com/76979871</code>, largura <code>100%</code>.</li>
                         </ul>
                     </li>
                 </ol>
@@ -1888,7 +1888,7 @@ php artisan serve</code></pre>
 
                 <table class="widget-table">
                     <tr><th>Widget</th><th>Configurações-chave</th></tr>
-                    <tr><td><strong>Vídeo</strong></td><td><strong>Video Type:</strong> <code>youtube</code> ou <code>vimeo</code>; <strong>Video URL</strong> (o campo é <em>Video URL</em>, não "URL"); <strong>Aspect Ratio:</strong> <code>16:9</code>. Sem <em>Video URL</em> o vídeo não é renderizado.</td></tr>
+                    <tr><td><strong>Vídeo</strong></td><td><strong>Vídeo Type:</strong> <code>youtube</code> ou <code>vimeo</code>; <strong>Vídeo URL</strong> (o campo é <em>Vídeo URL</em>, não "URL"); <strong>Aspect Ratio:</strong> <code>16:9</code>. Sem <em>Vídeo URL</em> o vídeo não é renderizado.</td></tr>
                     <tr><td><strong>Imagem</strong></td><td><strong>URL</strong>, <strong>Caption</strong>, <strong>Enable Lightbox:</strong> <code>yes</code>; <strong>Link</strong> + <strong>Link Target:</strong> <code>_blank</code> (imagem clicável); <strong>Hover Animation:</strong> <code>zoom</code>.</td></tr>
                     <tr><td><strong>Galeria</strong></td><td>repeater <strong>Images</strong>; <strong>Layout:</strong> <code>grid</code>; <strong>Columns:</strong> <code>3</code>; <strong>Gap</strong>, <strong>Show Caption</strong>, <strong>Enable Lightbox</strong>.</td></tr>
                     <tr><td><strong>Carousel</strong></td><td>repeater <strong>Images</strong>; <strong>Columns</strong>, <strong>Autoplay:</strong> <code>true</code>, <strong>Loop</strong>, <strong>Show Dots</strong>, <strong>Show Arrows</strong>, <strong>Speed:</strong> <code>3000</code> ms.</td></tr>
@@ -2279,7 +2279,7 @@ php artisan serve</code></pre>
 │                     WIDGETS (30 classes)                          │
 │  BaseWidget (abstract) → Heading, Text, Image, Button           │
 │                        → Section, Column, InnerSection           │
-│                        → Callout, Table, Math, Video             │
+│                        → Callout, Table, Math, Vídeo             │
 │                        → Divider, Spacer, Icon, Gallery          │
 │                        → Form, Tabs, Accordion                   │
 │                        → Counter, ProgressBar, SocialIcons       │
@@ -2760,7 +2760,7 @@ curl -X POST -H "Authorization: Bearer 1|abc123..." \
      http://localhost:8000/api/pages/1/elements</code></pre>
 
                 <div class="tip">
-                    <strong>&#128161; Dica:</strong> A API filtra páginas pelo <code>user_id</code> do token — cada usuário só vê suas próprias páginas. Use <code>?per_page=50</code> para ajustar a paginação.
+                    <strong>&#128161; Dica:</strong> A API filtra páginas pelo <code>user_id</code> do token — cada usuário só vê suas próprias páginas. Use <code>?per_page=50</code> para ajustar a páginação.
                 </div>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">API Resources (Transformers)</h3>
@@ -2965,15 +2965,15 @@ $page->touch();</pre>
                     <tr><td>7</td><td>36–38</td><td>Temas e Presets: Starter Templates, Color Presets, Typography Presets</td><td style="color:#d97706;font-weight:700">&#9202; Pendente</td></tr>
                     <tr><td>8</td><td>39–42</td><td>Responsividade: Breakpoints visuais, estilos responsivos por widget</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
                     <tr><td>9</td><td>43–53</td><td>Widgets Avançados: Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Inner Section</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
-                    <tr><td>10</td><td>54–65</td><td>Features Elementor-Pro: Gradient, Overlay, Shape Dividers, Video BG, Parallax, Scroll Animations, Sticky, Position, Image Filters, Button Gradient, Text Shadow/Stroke, Column Resize</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
+                    <tr><td>10</td><td>54–65</td><td>Features Elementor-Pro: Gradient, Overlay, Shape Dividers, Vídeo BG, Parallax, Scroll Animations, Sticky, Position, Image Filters, Button Gradient, Text Shadow/Stroke, Column Resize</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
                     <tr><td>11</td><td>66–68</td><td>Sistema Global: Global Colors, Global Fonts, Responsive Tabs</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
                     <tr><td>12</td><td>69–74</td><td>UX Avançada: Command Finder, Revision History, Save as Template, Column Structure, ARIA Accessibility, Keyboard Navigation</td><td style="color:green;font-weight:700">&#10003; Implementado</td></tr>
                 </table>
 
                 <h3 style="font-size:1rem;margin-top:1.25rem;margin-bottom:.5rem">Funcionalidades Adicionais Implementadas (fora do IMPROVEMENTS.md)</h3>
                 <ul>
-                    <li><strong>30 widgets</strong> — Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Video, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie</li>
-                    <li><strong>27 tipos de controles</strong> — text, number, textarea, select, color, boolean, url, image, video, wysiwyg, icon, gallery, repeater, typography, background, border, box_shadow, dimensions, hover, custom_css, animation, visibility, gradient, scroll_animation, text_shadow, text_stroke, column_width</li>
+                    <li><strong>30 widgets</strong> — Heading, Text, Image, Button, Section, Column, Inner Section, Callout, Table, Math, Vídeo, Divider, Spacer, Icon, Gallery, Form, Tabs, Accordion, Counter, Progress Bar, Social Icons, Icon Box, Image Box, Testimonial, Price Table, Countdown, Google Maps, Carousel, Mega Menu, Lottie</li>
+                    <li><strong>27 tipos de controles</strong> — text, number, textarea, select, color, boolean, url, image, vídeo, wysiwyg, icon, gallery, repeater, typography, background, border, box_shadow, dimensions, hover, custom_css, animation, visibility, gradient, scroll_animation, text_shadow, text_stroke, column_width</li>
                     <li><strong>Projetos</strong> — organização privada por usuário de páginas, temas e popups; projeto padrão "Meus Projetos" (não excluível), migração automática de dados existentes, seletor de projeto nas listagens e movimentação de itens via <code>projects.move</code></li>
                     <li><strong>Theme Builder</strong> — templates de tema (header, footer, single, archive, 404, search_results) com condições</li>
                     <li><strong>Popups</strong> — criação e edição com gatilhos e condições de exibição</li>
@@ -3022,7 +3022,7 @@ $page->touch();</pre>
                     <li><strong>ARIA Accessibility</strong> — roles semânticos, navegação por Tab, focus-visible</li>
                     <li><strong>Global Colors &amp; Fonts</strong> — paleta de cores e fontes do site</li>
                     <li><strong>Responsive Tabs</strong> — valores por breakpoint com fallback</li>
-                    <li><strong>Parallax &amp; Video Background</strong> — efeito parallax e vídeos de fundo</li>
+                    <li><strong>Parallax &amp; Vídeo Background</strong> — efeito parallax e vídeos de fundo</li>
                     <li><strong>Shape Dividers</strong> — 10 tipos de divisores SVG</li>
                     <li><strong>Background Overlay</strong> — cor overlay com blend modes</li>
                     <li><strong>Scroll Animations</strong> — fade, zoom, slide ativados no scroll</li>

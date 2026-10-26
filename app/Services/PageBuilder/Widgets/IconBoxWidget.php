@@ -14,8 +14,8 @@ class IconBoxWidget extends BaseWidget
 
         $this->defaultSettings = [
             'icon' => 'fas fa-rocket',
-            'title' => 'Fast & Reliable',
-            'description' => 'Our service delivers lightning-fast performance with 99.9% uptime guaranteed.',
+            'title' => 'Rápido e confiável',
+            'description' => 'Nosso serviço entrega alto desempenho com 99,9% de disponibilidade garantida.',
             'icon_size' => 48,
             'icon_color' => '#6366f1',
             'title_color' => '#1f2937',

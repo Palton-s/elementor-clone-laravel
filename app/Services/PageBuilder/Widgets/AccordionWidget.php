@@ -14,9 +14,9 @@ class AccordionWidget extends BaseWidget
 
         $this->defaultSettings = [
             'items' => [
-                ['title' => 'Section 1', 'content' => '<p>Content for section 1</p>', 'open' => true],
-                ['title' => 'Section 2', 'content' => '<p>Content for section 2</p>', 'open' => false],
-                ['title' => 'Section 3', 'content' => '<p>Content for section 3</p>', 'open' => false],
+                ['title' => 'Item 1', 'content' => '<p>Conteúdo do item 1</p>', 'open' => true],
+                ['title' => 'Item 2', 'content' => '<p>Conteúdo do item 2</p>', 'open' => false],
+                ['title' => 'Item 3', 'content' => '<p>Conteúdo do item 3</p>', 'open' => false],
             ],
             'active_item' => 0,
             'icon_position' => 'right',
@@ -61,12 +61,12 @@ class AccordionWidget extends BaseWidget
         $padding = (int) $settings['content_padding'];
 
         if (empty($items)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No items configured</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhum item configurado</div>';
         }
 
         $itemsHtml = '';
         foreach ($items as $i => $item) {
-            $title = htmlspecialchars($item['title'] ?? 'Section ' . ($i + 1), ENT_QUOTES, 'UTF-8');
+            $title = htmlspecialchars($item['title'] ?? 'Item ' . ($i + 1), ENT_QUOTES, 'UTF-8');
             $itemContent = $item['content'] ?? '';
             $isOpen = !empty($item['open']);
 
@@ -125,12 +125,12 @@ class AccordionWidget extends BaseWidget
         $padding = (int) $settings['content_padding'];
 
         if (empty($items)) {
-            return '<div style="text-align:center;padding:1rem;color:#999">No items</div>';
+            return '<div style="text-align:center;padding:1rem;color:#999">Nenhum item</div>';
         }
 
         $itemsHtml = '';
         foreach ($items as $i => $item) {
-            $title = htmlspecialchars($item['title'] ?? 'Section ' . ($i + 1), ENT_QUOTES, 'UTF-8');
+            $title = htmlspecialchars($item['title'] ?? 'Item ' . ($i + 1), ENT_QUOTES, 'UTF-8');
             $tabContent = $item['content'] ?? '';
             $isOpen = !empty($item['open']);
 

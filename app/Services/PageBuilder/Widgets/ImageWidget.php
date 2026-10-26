@@ -72,7 +72,8 @@ class ImageWidget extends BaseWidget
     public function render(array $settings, array $content = [], array $styles = []): string
     {
         $settings = $this->prepareSettings($settings);
-        $image = $settings['image'];
+        // Images saved via API/import may omit width/height
+        $image = array_merge($this->defaultSettings['image'], (array) $settings['image']);
         $caption = htmlspecialchars($settings['caption'], ENT_QUOTES, 'UTF-8');
         $alignment = $settings['alignment'];
         $width = $settings['width'];
@@ -91,7 +92,7 @@ class ImageWidget extends BaseWidget
         $imageFlip = $settings['image_flip'] ?? 'none';
 
         if (empty($image['url'])) {
-            return '<div class="pb-image-placeholder">No image selected</div>';
+            return '<div class="pb-image-placeholder">Nenhuma imagem selecionada</div>';
         }
 
         $imgStyle = "width: {$width}; max-width: {$maxWidth}; height: {$height}; object-fit: {$objectFit}; border-radius: {$borderRadius}; opacity: {$opacity};";
@@ -163,7 +164,7 @@ class ImageWidget extends BaseWidget
         $image = $settings['image'];
 
         if (empty($image['url'])) {
-            return '<div class="pb-image-placeholder">Click to add image</div>';
+            return '<div class="pb-image-placeholder">Clique para adicionar uma imagem</div>';
         }
 
         $width = $settings['width'];

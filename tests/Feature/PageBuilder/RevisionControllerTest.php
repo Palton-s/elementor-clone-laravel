@@ -68,7 +68,7 @@ class RevisionControllerTest extends TestCase
             ->post(route('page-builder.revisions.restore', [$this->page, $revision]));
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Revision restored successfully');
+        $response->assertJsonPath('message', 'Revisão restaurada');
     }
 
     public function test_cannot_restore_revision_of_other_users_page(): void
@@ -101,7 +101,7 @@ class RevisionControllerTest extends TestCase
             ->delete(route('page-builder.revisions.destroy', $revision));
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Revision deleted successfully');
+        $response->assertJsonPath('message', 'Revisão excluída');
     }
 
     public function test_prune_revisions(): void
@@ -125,7 +125,7 @@ class RevisionControllerTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Auto-save queued successfully');
+        $response->assertJsonPath('message', 'Salvamento automático agendado');
         $this->assertDatabaseHas('revisions', [
             'page_id' => $this->page->id,
             'type' => 'auto_save',

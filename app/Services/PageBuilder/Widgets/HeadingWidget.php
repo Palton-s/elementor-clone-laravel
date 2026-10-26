@@ -13,7 +13,7 @@ class HeadingWidget extends BaseWidget
         $this->keywords = ['heading', 'title', 'h1', 'h2', 'h3'];
 
         $this->defaultSettings = [
-            'title' => 'Your Heading Title',
+            'title' => 'Seu título aqui',
             'tag' => 'h2',
             'alignment' => 'left',
             'size' => 'default',

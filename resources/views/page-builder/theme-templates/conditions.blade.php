@@ -1,18 +1,18 @@
 @extends('page-builder.layouts.app')
 
-@section('title', 'Conditions - ' . $themeTemplate->title)
+@section('title', 'Onde exibir - ' . $themeTemplate->title)
 
 @section('content')
 <div class="container">
     <div class="page-header">
         <div>
-            <h1>Conditions: {{ $themeTemplate->title }}</h1>
+            <h1>Onde exibir: {{ $themeTemplate->title }}</h1>
             <p style="color:#64748b;font-size:.875rem;margin-top:.25rem">
-                Define where this <strong>{{ $themeTemplate->getTypeLabel() }}</strong> template should appear
+                Defina em quais páginas este modelo de <strong>{{ $themeTemplate->getTypeLabel() }}</strong> aparece
             </p>
         </div>
         <div style="display:flex;gap:.5rem">
-            <a href="{{ route('page-builder.themes.editor', $themeTemplate) }}" class="btn btn-info">✏️ Edit</a>
+            <a href="{{ route('page-builder.themes.editor', $themeTemplate) }}" class="btn btn-info">✏️ Editar</a>
             <a href="{{ route('page-builder.themes.index') }}" class="btn btn-secondary">&larr; Back</a>
         </div>
     </div>
@@ -24,18 +24,18 @@
 
             <div style="display:flex;gap:.5rem;margin-top:1rem">
                 <select id="condition-type" class="form-control form-select" style="flex:1">
-                    <option value="">Select condition...</option>
+                    <option value="">Selecione onde exibir...</option>
                 </select>
                 <div id="condition-value-wrap" style="display:none;flex:1">
                     <select id="condition-value" class="form-control form-select">
-                        <option value="">Select page...</option>
+                        <option value="">Selecione a página...</option>
                     </select>
                 </div>
-                <button id="add-condition" class="btn btn-secondary" disabled>+ Add</button>
+                <button id="add-condition" class="btn btn-secondary" disabled>+ Adicionar</button>
             </div>
 
             <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #e2e8f0;display:flex;gap:.75rem">
-                <button id="save-conditions" class="btn btn-primary">Save Conditions</button>
+                <button id="save-conditions" class="btn btn-primary">Salvar</button>
                 <span id="save-status" style="font-size:.82rem;color:#64748b;align-self:center"></span>
             </div>
         </div>
@@ -43,17 +43,17 @@
 
     <div style="margin-top:1.5rem">
         <div class="card" style="background:#f8fafc;padding:1rem">
-            <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.5rem">How Conditions Work</h3>
+            <h3 style="font-size:.9rem;font-weight:600;margin-bottom:.5rem">Como funciona</h3>
             <ul style="font-size:.82rem;color:#64748b;line-height:1.8;padding-left:1.25rem">
-                <li><strong>Entire Site</strong> — Template appears on every page</li>
-                <li><strong>Homepage</strong> — Template appears only on the homepage</li>
-                <li><strong>All Pages</strong> — Template appears on all content pages</li>
-                <li><strong>All Singular</strong> — Template appears on all singular pages/posts</li>
-                <li><strong>Specific Page</strong> — Template appears only on the selected page</li>
+                <li><strong>Site inteiro</strong> — aparece em todas as páginas</li>
+                <li><strong>Página inicial</strong> — aparece só na página inicial</li>
+                <li><strong>Todas as páginas</strong> — aparece em todas as páginas de conteúdo</li>
+                <li><strong>Todas as páginas individuais</strong> — aparece em todas as páginas e artigos individuais</li>
+                <li><strong>Página específica</strong> — aparece só na página escolhida</li>
             </ul>
             <p style="font-size:.78rem;color:#94a3b8;margin-top:.5rem">
-                Multiple conditions act as OR — the template will be used if ANY condition matches.
-                The first matching template by order is used.
+                Com várias regras, basta UMA delas valer para o modelo ser usado.
+                Se mais de um modelo servir, vale o primeiro da lista.
             </p>
         </div>
     </div>
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderTypeOptions() {
-        conditionType.innerHTML = '<option value="">Select condition...</option>';
+        conditionType.innerHTML = '<option value="">Selecione onde exibir...</option>';
         for (const [key, label] of Object.entries(conditionOptions)) {
             const opt = document.createElement('option');
             opt.value = key;
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             conditionType.appendChild(opt);
         }
 
-        conditionValue.innerHTML = '<option value="">Select page...</option>';
+        conditionValue.innerHTML = '<option value="">Selecione a página...</option>';
         availablePages.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.slug;
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderConditions() {
         if (conditions.length === 0) {
-            conditionsList.innerHTML = '<div style="padding:1rem;text-align:center;color:#94a3b8;font-size:.85rem;background:#f8fafc;border-radius:8px">No conditions — template will appear on all pages</div>';
+            conditionsList.innerHTML = '<div style="padding:1rem;text-align:center;color:#94a3b8;font-size:.85rem;background:#f8fafc;border-radius:8px">Nenhuma regra — o modelo aparece em todas as páginas</div>';
             return;
         }
 
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     saveBtn.addEventListener('click', function() {
         saveBtn.disabled = true;
-        saveStatus.textContent = 'Saving...';
+        saveStatus.textContent = 'Salvando...';
 
         fetch('{{ route('page-builder.themes.conditions.update', $themeTemplate) }}', {
             method: 'PUT',
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => { saveStatus.textContent = ''; }, 3000);
         })
         .catch(err => {
-            saveStatus.textContent = '❌ Error: ' + err.message;
+            saveStatus.textContent = '❌ Erro: ' + err.message;
         })
         .finally(() => {
             saveBtn.disabled = false;

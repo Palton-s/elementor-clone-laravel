@@ -101,11 +101,11 @@ class Popup extends Model
     public static function triggerTypes(): array
     {
         return [
-            'on_load' => ['label' => 'On Page Load', 'has_value' => false],
-            'on_timer' => ['label' => 'After Timer (seconds)', 'has_value' => true, 'placeholder' => 'Seconds (default 3)'],
-            'on_scroll' => ['label' => 'On Scroll (%)', 'has_value' => true, 'placeholder' => 'Scroll percentage'],
-            'on_exit' => ['label' => 'Exit Intent', 'has_value' => false],
-            'on_click' => ['label' => 'On Click (CSS selector)', 'has_value' => true, 'placeholder' => 'CSS selector, e.g. .my-btn'],
+            'on_load' => ['label' => 'Ao carregar a página', 'has_value' => false],
+            'on_timer' => ['label' => 'Após um tempo (segundos)', 'has_value' => true, 'placeholder' => 'Segundos (padrão 3)'],
+            'on_scroll' => ['label' => 'Ao rolar (%)', 'has_value' => true, 'placeholder' => 'Porcentagem da página'],
+            'on_exit' => ['label' => 'Intenção de saída', 'has_value' => false],
+            'on_click' => ['label' => 'Ao clicar (seletor CSS)', 'has_value' => true, 'placeholder' => 'Seletor CSS, ex.: .meu-botao'],
         ];
     }
 }

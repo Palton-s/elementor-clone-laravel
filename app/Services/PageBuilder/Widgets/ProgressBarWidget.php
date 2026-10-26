@@ -13,7 +13,7 @@ class ProgressBarWidget extends BaseWidget
         $this->keywords = ['progress', 'bar', 'percentage', 'skill'];
 
         $this->defaultSettings = [
-            'title' => 'Web Development',
+            'title' => 'Desenvolvimento web',
             'percentage' => 70,
             'height' => '20px',
             'color' => '#6366f1',

@@ -170,7 +170,7 @@ class PageControllerTest extends TestCase
             ->post(route('page-builder.pages.duplicate', $page));
 
         $response->assertStatus(200);
-        $response->assertJsonPath('page.title', $page->title . ' (copy)');
+        $response->assertJsonPath('page.title', $page->title . ' (cópia)');
     }
 
     public function test_user_can_export_page(): void
@@ -234,7 +234,7 @@ class PageControllerTest extends TestCase
             ]);
 
         $response->assertStatus(200);
-        $response->assertJsonPath('message', 'Template "Landing Page" applied');
+        $response->assertJsonPath('message', 'Modelo "Página de vendas" aplicado');
     }
 
     public function test_apply_invalid_template_returns_404(): void

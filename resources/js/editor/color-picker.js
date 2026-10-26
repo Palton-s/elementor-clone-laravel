@@ -82,7 +82,7 @@ export function _colorInput(key, value, saveFn, elementId) {
 
         if (globalColors.length > 0) {
             const glLabel = document.createElement('div');
-            glLabel.textContent = 'Global Colors';
+            glLabel.textContent = 'Cores globais';
             glLabel.style.cssText = 'font-size:.65rem;font-weight:600;color:var(--pb-accent);text-transform:uppercase;letter-spacing:.5px';
             paletteDiv.appendChild(glLabel);
 
@@ -105,7 +105,7 @@ export function _colorInput(key, value, saveFn, elementId) {
 
         if (recentColors.length > 0) {
             const rcLabel = document.createElement('div');
-            rcLabel.textContent = 'Recent';
+            rcLabel.textContent = 'Recentes';
             rcLabel.style.cssText = 'font-size:.65rem;font-weight:600;color:var(--pb-text2);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem';
             paletteDiv.appendChild(rcLabel);
 
@@ -129,7 +129,7 @@ export function _colorInput(key, value, saveFn, elementId) {
 
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
-    clearBtn.textContent = 'Clear';
+    clearBtn.textContent = 'Limpar';
     clearBtn.style.cssText = 'padding:.2rem .5rem;background:var(--pb-surface2);border:1px solid var(--pb-border);border-radius:4px;color:var(--pb-text2);cursor:pointer;font-size:.7rem;align-self:flex-start;margin-top:.15rem';
     clearBtn.onclick = () => update('');
     container.appendChild(clearBtn);

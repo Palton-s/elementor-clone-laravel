@@ -15,7 +15,7 @@
 
                 <div class="form-group">
                     <label for="title">Título <span class="required">*</span></label>
-                    <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}" placeholder="Ex: Home, Sobre, Contato" required autofocus>
+                    <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}" placeholder="Ex: Início, Sobre, Contato" required autofocus>
                     @error('title')
                         <div class="error">{{ $message }}</div>
                     @enderror
@@ -63,10 +63,10 @@
                                 <div class="template-card-info">
                                     <strong>{{ $name }}</strong>
                                     <span>
-                                        @if($key === 'landing')Hero section with CTA
-                                        @elseif($key === 'about')Company presentation
-                                        @elseif($key === 'contact')Contact form layout
-                                        @elseif($key === 'showcase')Futuristic dark theme: hero with video, gallery & carousel, images with lightbox, pricing, testimonials, Lottie, form, map, footer
+                                        @if($key === 'landing')Topo com chamada para ação
+                                        @elseif($key === 'about')Apresentação da empresa
+                                        @elseif($key === 'contact')Formulário de contato
+                                        @elseif($key === 'showcase')Tema escuro futurista: topo com vídeo, galeria e carrossel, imagens ampliáveis, preços, depoimentos, animação, formulário, mapa e rodapé
                                         @elseif($key === 'moodle-course')Curso educacional completo para Moodle
                                         @else&#8205;@endif
                                     </span>
